@@ -147,7 +147,7 @@ export default function App() {
 
       {/* Mobile bottom nav */}
       <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-line bg-ink/95 pb-[env(safe-area-inset-bottom)] backdrop-blur lg:hidden">
-        <div className="mx-auto grid max-w-lg grid-cols-6">
+        <div className="mx-auto grid max-w-lg grid-cols-7">
           {ROUTES.map((r) => {
             const active = r.key === route;
             return (
