@@ -222,3 +222,31 @@ export interface Baseline {
     max_drawdown_percent: number;
   };
 }
+
+
+export interface LiveInstrumentState {
+  instrument: string;
+  timeframe: string;
+  provider: string;
+  data_status: string;
+  current_price: number | null;
+  last_update: string | null;
+  decision: string;
+  reason: string;
+}
+export interface LiveOverview {
+  mode: string;
+  mt5: { status: string; message: string };
+  execution: { enabled: boolean; note: string };
+  market_data: { provider: string; status: string };
+  context: { news: string; calendar: string };
+  instruments: LiveInstrumentState[];
+  trade_plan: {
+    instrument: string;
+    decision: string;
+    entry_price: number | null;
+    stop_loss: number | null;
+    take_profit: number | null;
+    reason: string;
+  };
+}
