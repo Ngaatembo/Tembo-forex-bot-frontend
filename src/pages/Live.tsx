@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
-import { Activity, AlertTriangle, ArrowRight, BarChart3, CalendarClock, Crosshair, ShieldCheck, Zap } from 'lucide-react';
+import { Activity, AlertTriangle, ArrowRight, BarChart3, CalendarClock, Crosshair, LineChart, ShieldCheck, Zap } from 'lucide-react';
 import { useApi } from '../lib/api';
-import type { LiveOverview } from '../lib/types';
+import type { LiveMarket, LiveOverview } from '../lib/types';
 import { INSTRUMENTS, dateTime, humanize, price, toneFor } from '../lib/format';
 import { Card, ErrorBlock, LoadingBlock, PageHeader, Pill, Stat } from '../components/ui';
 
@@ -34,6 +34,81 @@ function TradePlan({ plan }: { plan: LiveOverview['trade_plan'] }) {
         <div className="mb-1 flex items-center gap-2 font-medium text-fg"><ShieldCheck className="h-4 w-4 text-up" /> Risk gate</div>
         {plan.reason}
       </div>
+    </Card>
+  );
+}
+
+function MarketChart({ data }: { data: LiveMarket | null }) {
+  const points = useMemo(() => {
+    if (!data?.candles.length) return '';
+    const closes = data.candles.map((c) => c.close);
+    const min = Math.min(...closes);
+    const max = Math.max(...closes);
+    const span = max - min || 1;
+    return closes
+      .map((value, index) => {
+        const x = 8 + (index / Math.max(closes.length - 1, 1)) * 984;
+        const y = 12 + (1 - (value - min) / span) * 216;
+        return `${x.toFixed(1)},${y.toFixed(1)}`;
+      })
+      .join(' ');
+  }, [data]);
+
+  if (!data || data.status === 'mock' || !data.candles.length) {
+    return (
+      <div className="grid min-h-64 place-items-center rounded-xl border border-dashed border-line-2 bg-panel-2 px-5 text-center">
+        <div>
+          <LineChart className="mx-auto h-7 w-7 text-faint" />
+          <div className="mt-2 text-sm font-medium">Chart waiting for verified market data</div>
+          <p className="mt-1 max-w-md text-xs leading-relaxed text-muted">
+            Tembo does not draw a synthetic chart from mock prices. Once a real provider is connected, validated candles will appear here.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="overflow-hidden rounded-xl border border-line bg-panel-2 p-3">
+      <div className="mb-2 flex items-center justify-between text-[11px] text-muted">
+        <span>{data.candles.length} validated candles · {humanize(data.timeframe)}</span>
+        <span>{data.last_update ? dateTime(data.last_update) : '—'}</span>
+      </div>
+      <svg viewBox="0 0 1000 240" className="h-64 w-full" role="img" aria-label={`${data.instrument} price chart`}>
+        <line x1="8" y1="228" x2="992" y2="228" stroke="currentColor" className="text-line" strokeWidth="1" />
+        <line x1="8" y1="12" x2="992" y2="12" stroke="currentColor" className="text-line" strokeWidth="1" />
+        <polyline points={points} fill="none" stroke="currentColor" className="text-gold" strokeWidth="3" strokeLinejoin="round" strokeLinecap="round" />
+      </svg>
+      <div className="mt-2 flex items-center justify-between text-xs text-muted">
+        <span>Provider: {humanize(data.provider)}</span>
+        <Pill tone="good">Data quality verified</Pill>
+      </div>
+    </div>
+  );
+}
+
+function MarketWorkspace({ instrument, timeframe }: { instrument: string; timeframe: string }) {
+  const market = useApi<LiveMarket>(`/live/market?instrument=${encodeURIComponent(instrument)}&timeframe=${timeframe.toLowerCase()}&limit=120`);
+
+  return (
+    <Card title="Live market workspace" subtitle="Quote + validated candles · read-only">
+      {market.loading && !market.data ? <LoadingBlock rows={4} /> : market.error && !market.data ? (
+        <ErrorBlock error={market.error} onRetry={market.reload} />
+      ) : (
+        <>
+          <div className="mb-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
+            <Stat label="Quote" value={market.data?.current_price != null ? price(market.data.current_price, instrument) : '—'} />
+            <Stat label="Feed" value={humanize(market.data?.status)} />
+            <Stat label="Candles" value={market.data?.candles.length.toString() ?? '0'} />
+            <Stat label="Quality" value={market.data?.data_quality.is_clean ? 'Verified' : 'Waiting'} />
+          </div>
+          <MarketChart data={market.data} />
+          <div className="mt-3 flex items-start gap-2 rounded-xl border border-line bg-panel-2 p-3 text-xs leading-relaxed text-muted">
+            <BarChart3 className="mt-0.5 h-4 w-4 shrink-0 text-gold" />
+            {market.data?.message ?? 'Waiting for market data.'}
+          </div>
+        </>
+      )}
     </Card>
   );
 }
@@ -85,6 +160,10 @@ export default function Live({ go: _go }: { go?: (r: string) => void }) {
               <div className="flex items-center gap-2"><ShieldCheck className="h-5 w-5 text-up" /><span className="font-medium">{data.data.execution.enabled ? 'Execution enabled' : 'Execution disabled'}</span></div>
               <p className="mt-2 text-xs text-muted">{data.data.execution.note}</p>
             </Card>
+          </div>
+
+          <div className="mt-4">
+            <MarketWorkspace instrument={instrument} timeframe={timeframe} />
           </div>
 
           <div className="mt-4 grid gap-4 lg:grid-cols-2">
