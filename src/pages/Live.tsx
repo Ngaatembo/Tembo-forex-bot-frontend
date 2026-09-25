@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Activity, AlertTriangle, ArrowRight, BarChart3, CalendarClock, Crosshair, LineChart, ShieldCheck, Zap } from 'lucide-react';
 import { useApi } from '../lib/api';
-import type { LiveMarket, LiveOverview } from '../lib/types';
+import type { LiveAnalysis, LiveMarket, LiveOverview, MultiTimeframeAnalysis } from '../lib/types';
 import { INSTRUMENTS, dateTime, humanize, price, toneFor } from '../lib/format';
 import { Card, ErrorBlock, LoadingBlock, PageHeader, Pill, Stat } from '../components/ui';
 
@@ -87,6 +87,68 @@ function MarketChart({ data }: { data: LiveMarket | null }) {
   );
 }
 
+
+function AnalysisWorkspace({ instrument, timeframe }: { instrument: string; timeframe: string }) {
+  const analysis = useApi<LiveAnalysis>(`/live/analysis?instrument=${encodeURIComponent(instrument)}&timeframe=${timeframe.toLowerCase()}`);
+  const multi = useApi<MultiTimeframeAnalysis>(`/live/analysis/multi-timeframe?instrument=${encodeURIComponent(instrument)}`);
+
+  const item = analysis.data?.analysis;
+  const cards = [
+    ['Trend', item?.trend?.state ?? 'Waiting'],
+    ['Momentum', item?.momentum?.state ?? 'Waiting'],
+    ['Volatility', item?.volatility?.state ?? 'Waiting'],
+    ['Structure', item?.market_structure?.label ?? 'Waiting'],
+  ];
+
+  return (
+    <Card title="Technical analysis" subtitle="Deterministic analysis of verified completed candles · no trade signal">
+      {analysis.loading && !analysis.data ? <LoadingBlock rows={4} /> : analysis.error && !analysis.data ? (
+        <ErrorBlock error={analysis.error} onRetry={analysis.reload} />
+      ) : (
+        <>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            {cards.map(([label, value]) => <Stat key={label} label={label} value={humanize(value)} />)}
+          </div>
+          <div className="mt-4 grid gap-3 sm:grid-cols-2">
+            <div className="rounded-xl border border-line bg-panel-2 p-3">
+              <div className="text-xs font-medium text-fg">Momentum</div>
+              <div className="mt-2 text-sm">{item?.momentum?.rsi_14 != null ? `RSI 14 · ${item.momentum.rsi_14.toFixed(1)}` : 'RSI waiting for warm-up'}</div>
+              <div className="mt-1 text-xs text-muted">{humanize(item?.momentum?.state)}</div>
+            </div>
+            <div className="rounded-xl border border-line bg-panel-2 p-3">
+              <div className="text-xs font-medium text-fg">Support / resistance</div>
+              <div className="mt-2 grid grid-cols-2 gap-2 text-sm">
+                <span>Support: {price(item?.support_resistance?.support, instrument)}</span>
+                <span>Resistance: {price(item?.support_resistance?.resistance, instrument)}</span>
+              </div>
+            </div>
+          </div>
+          <div className="mt-4 rounded-xl border border-line bg-panel-2 p-3 text-xs leading-relaxed text-muted">
+            {analysis.data?.message ?? 'Waiting for verified candles.'}
+          </div>
+        </>
+      )}
+
+      <div className="mt-4 border-t border-line pt-4">
+        <div className="mb-2 flex items-center justify-between">
+          <div>
+            <div className="text-xs font-medium text-fg">Multi-timeframe context</div>
+            <div className="text-[11px] text-muted">Same deterministic engine across M5 → D1</div>
+          </div>
+          <Pill tone={multi.data?.status === 'available' ? 'good' : 'warn'}>{humanize(multi.data?.status)}</Pill>
+        </div>
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
+          {['m5','m15','h1','h4','d1'].map((tf) => {
+            const value = multi.data?.timeframes?.[tf];
+            const state = value && 'trend' in value ? value.trend?.state ?? 'Waiting' : value?.status ?? 'Waiting';
+            return <div key={tf} className="rounded-lg border border-line bg-panel p-2 text-center"><div className="text-[10px] text-muted">{tf.toUpperCase()}</div><div className="mt-1 text-xs font-medium">{humanize(state)}</div></div>;
+          })}
+        </div>
+      </div>
+    </Card>
+  );
+}
+
 function MarketWorkspace({ instrument, timeframe }: { instrument: string; timeframe: string }) {
   const market = useApi<LiveMarket>(`/live/market?instrument=${encodeURIComponent(instrument)}&timeframe=${timeframe.toLowerCase()}&limit=120`);
 
@@ -164,6 +226,10 @@ export default function Live({ go: _go }: { go?: (r: string) => void }) {
 
           <div className="mt-4">
             <MarketWorkspace instrument={instrument} timeframe={timeframe} />
+          </div>
+
+          <div className="mt-4">
+            <AnalysisWorkspace instrument={instrument} timeframe={timeframe} />
           </div>
 
           <div className="mt-4 grid gap-4 lg:grid-cols-2">
