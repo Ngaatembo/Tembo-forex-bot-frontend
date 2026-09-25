@@ -274,3 +274,63 @@ export interface LiveMarket {
   };
   message: string;
 }
+
+
+export interface LiveAnalysis {
+  instrument: string;
+  timeframe: string;
+  provider: string;
+  status: string;
+  message: string;
+  data_quality?: {
+    is_clean: boolean;
+    ohlc_violations: number;
+    duplicate_timestamps: number;
+    unexpected_gaps: number;
+  };
+  analysis: {
+    status: string;
+    reason?: string;
+    as_of?: string;
+    close?: number;
+    trend?: {
+      state: string;
+      regime: string;
+      sma_10: number | null;
+      sma_50: number | null;
+      sma_50_slope: number | null;
+      sma_distance_pct: number | null;
+    } | null;
+    momentum?: {
+      state: string;
+      rsi_14: number | null;
+    } | null;
+    volatility?: {
+      state: string;
+      atr_14: number | null;
+      atr_percent: number | null;
+    } | null;
+    support_resistance?: {
+      support: number | null;
+      resistance: number | null;
+      recent_high: number | null;
+      recent_low: number | null;
+      rolling_range: number | null;
+    } | null;
+    market_structure?: {
+      label: string;
+      confirmed_swing_high: number | null;
+      previous_swing_high: number | null;
+      confirmed_swing_low: number | null;
+      previous_swing_low: number | null;
+    } | null;
+  } | null;
+}
+
+export interface MultiTimeframeAnalysis {
+  instrument: string;
+  provider: string;
+  status: string;
+  message: string;
+  timeframes: Record<string, LiveAnalysis['analysis'] | { status: string; reason: string } | null>;
+}
