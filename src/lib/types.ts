@@ -250,3 +250,27 @@ export interface LiveOverview {
     reason: string;
   };
 }
+
+
+export interface LiveMarket {
+  instrument: string;
+  timeframe: string;
+  provider: string;
+  status: string;
+  current_price: number | null;
+  last_update: string | null;
+  instrument_metadata?: {
+    symbol: string;
+    display_name: string;
+    pip_size: number;
+    asset_class: string;
+  };
+  candles: Candle[];
+  data_quality: {
+    is_clean: boolean;
+    ohlc_violations: number;
+    duplicate_timestamps: number;
+    unexpected_gaps: number;
+  };
+  message: string;
+}
