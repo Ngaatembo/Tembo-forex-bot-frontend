@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { Activity, AlertTriangle, ArrowRight, BarChart3, CalendarClock, Crosshair, ShieldCheck, Zap } from 'lucide-react';
-import { enc, useApi } from '../lib/api';
+import { useApi } from '../lib/api';
 import type { LiveOverview } from '../lib/types';
 import { INSTRUMENTS, dateTime, humanize, price, toneFor } from '../lib/format';
 import { Card, ErrorBlock, LoadingBlock, PageHeader, Pill, Stat } from '../components/ui';
@@ -38,7 +38,7 @@ function TradePlan({ plan }: { plan: LiveOverview['trade_plan'] }) {
   );
 }
 
-export default function Live({ go }: { go: (r: string) => void }) {
+export default function Live() {
   const [instrument, setInstrument] = useState<string>(INSTRUMENTS[0]);
   const [timeframe, setTimeframe] = useState('H1');
   const data = useApi<LiveOverview>(`/live/overview?instrument=${encodeURIComponent(instrument)}&timeframe=${timeframe.toLowerCase()}`);
