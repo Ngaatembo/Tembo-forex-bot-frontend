@@ -1,0 +1,81 @@
+@import 'tailwindcss';
+
+@theme {
+  --font-sans: 'Inter Tight', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
+
+  --color-ink: #0a0d12;
+  --color-panel: #11161e;
+  --color-panel-2: #161c26;
+  --color-line: #222a36;
+  --color-line-2: #2c3544;
+  --color-fg: #e8ecf2;
+  --color-muted: #8b95a5;
+  --color-faint: #5d6776;
+
+  --color-gold: #e5b64a;
+  --color-gold-soft: #3a2f16;
+  --color-up: #3ecf8e;
+  --color-up-soft: #10301f;
+  --color-down: #f06a6a;
+  --color-down-soft: #3a1618;
+  --color-info: #6aa8f0;
+  --color-info-soft: #13243a;
+  --color-warn: #f0b85a;
+  --color-warn-soft: #362812;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  background: var(--color-ink);
+  color: var(--color-fg);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.num {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-none {
+  scrollbar-width: none;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200px 0;
+  }
+  100% {
+    background-position: calc(200px + 100%) 0;
+  }
+}
+.skeleton {
+  background: linear-gradient(90deg, var(--color-panel-2) 0, #1d2531 40px, var(--color-panel-2) 80px);
+  background-size: 200px 100%;
+  animation: shimmer 1.4s infinite linear;
+  border-radius: 6px;
+}
+
+@keyframes pulse-dot {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+.pulse-dot {
+  animation: pulse-dot 1.6s ease-in-out infinite;
+}

@@ -1,0 +1,440 @@
+{
+ "source": "Tembo-forex-bot research/results (Edge Validation Experiments 1 & 2)",
+ "snapshot_date": "2026-09-02",
+ "data_period": "2012\u20132022, H1 candles, BASE costs",
+ "walk_forward": {
+  "development_days": 1000,
+  "validation_days": 200,
+  "out_of_sample_days": 200,
+  "step_days": 200
+ },
+ "fixed_strategies": [
+  {
+   "instrument": "EUR/USD",
+   "strategy": "SMA crossover",
+   "oos_trades": 874,
+   "profit_factor": 0.973,
+   "win_rate": 0.336,
+   "windows_profitable_pct": 40.0,
+   "classification": "MIXED"
+  },
+  {
+   "instrument": "EUR/USD",
+   "strategy": "Breakout (40)",
+   "oos_trades": 623,
+   "profit_factor": 0.944,
+   "win_rate": 0.266,
+   "windows_profitable_pct": 30.0,
+   "classification": "MIXED"
+  },
+  {
+   "instrument": "EUR/USD",
+   "strategy": "Momentum (20)",
+   "oos_trades": 3281,
+   "profit_factor": 0.836,
+   "win_rate": 0.293,
+   "windows_profitable_pct": 10.0,
+   "classification": "MIXED"
+  },
+  {
+   "instrument": "EUR/USD",
+   "strategy": "Regime-filtered breakout (40)",
+   "oos_trades": 477,
+   "profit_factor": 0.954,
+   "win_rate": 0.275,
+   "windows_profitable_pct": 60.0,
+   "classification": "MIXED"
+  },
+  {
+   "instrument": "GBP/USD",
+   "strategy": "SMA crossover",
+   "oos_trades": 825,
+   "profit_factor": 1.053,
+   "win_rate": 0.352,
+   "windows_profitable_pct": 20.0,
+   "classification": "MIXED"
+  },
+  {
+   "instrument": "GBP/USD",
+   "strategy": "Breakout (40)",
+   "oos_trades": 630,
+   "profit_factor": 1.009,
+   "win_rate": 0.246,
+   "windows_profitable_pct": 40.0,
+   "classification": "MIXED"
+  },
+  {
+   "instrument": "GBP/USD",
+   "strategy": "Momentum (20)",
+   "oos_trades": 3241,
+   "profit_factor": 0.903,
+   "win_rate": 0.306,
+   "windows_profitable_pct": 30.0,
+   "classification": "MIXED"
+  },
+  {
+   "instrument": "GBP/USD",
+   "strategy": "Regime-filtered breakout (40)",
+   "oos_trades": 547,
+   "profit_factor": 1.02,
+   "win_rate": 0.238,
+   "windows_profitable_pct": 50.0,
+   "classification": "MIXED"
+  },
+  {
+   "instrument": "XAU/USD",
+   "strategy": "SMA crossover",
+   "oos_trades": 942,
+   "profit_factor": 1.1,
+   "win_rate": 0.334,
+   "windows_profitable_pct": 63.6,
+   "classification": "MIXED"
+  },
+  {
+   "instrument": "XAU/USD",
+   "strategy": "Breakout (40)",
+   "oos_trades": 604,
+   "profit_factor": 1.163,
+   "win_rate": 0.272,
+   "windows_profitable_pct": 45.5,
+   "classification": "MIXED"
+  },
+  {
+   "instrument": "XAU/USD",
+   "strategy": "Momentum (20)",
+   "oos_trades": 3519,
+   "profit_factor": 1.038,
+   "win_rate": 0.328,
+   "windows_profitable_pct": 72.7,
+   "classification": "MIXED"
+  },
+  {
+   "instrument": "XAU/USD",
+   "strategy": "Regime-filtered breakout (40)",
+   "oos_trades": 585,
+   "profit_factor": 1.184,
+   "win_rate": 0.274,
+   "windows_profitable_pct": 54.5,
+   "classification": "MIXED"
+  }
+ ],
+ "selector": [
+  {
+   "instrument": "EUR/USD",
+   "windows": 10,
+   "windows_traded": 0,
+   "windows_positive": 0,
+   "total_oos_net_pnl": 0,
+   "per_window": [
+    {
+     "oos_start": "2016-02-29",
+     "oos_end": "2016-09-16",
+     "status": "NO_VALIDATED_EDGE",
+     "selected": null,
+     "net_pnl": null
+    },
+    {
+     "oos_start": "2016-09-16",
+     "oos_end": "2017-04-04",
+     "status": "NO_VALIDATED_EDGE",
+     "selected": null,
+     "net_pnl": null
+    },
+    {
+     "oos_start": "2017-04-04",
+     "oos_end": "2017-10-21",
+     "status": "NO_VALIDATED_EDGE",
+     "selected": null,
+     "net_pnl": null
+    },
+    {
+     "oos_start": "2017-10-21",
+     "oos_end": "2018-05-09",
+     "status": "NO_VALIDATED_EDGE",
+     "selected": null,
+     "net_pnl": null
+    },
+    {
+     "oos_start": "2018-05-09",
+     "oos_end": "2018-11-25",
+     "status": "NO_VALIDATED_EDGE",
+     "selected": null,
+     "net_pnl": null
+    },
+    {
+     "oos_start": "2018-11-25",
+     "oos_end": "2019-06-13",
+     "status": "NO_VALIDATED_EDGE",
+     "selected": null,
+     "net_pnl": null
+    },
+    {
+     "oos_start": "2019-06-13",
+     "oos_end": "2019-12-30",
+     "status": "NO_VALIDATED_EDGE",
+     "selected": null,
+     "net_pnl": null
+    },
+    {
+     "oos_start": "2019-12-30",
+     "oos_end": "2020-07-17",
+     "status": "NO_VALIDATED_EDGE",
+     "selected": null,
+     "net_pnl": null
+    },
+    {
+     "oos_start": "2020-07-17",
+     "oos_end": "2021-02-02",
+     "status": "NO_VALIDATED_EDGE",
+     "selected": null,
+     "net_pnl": null
+    },
+    {
+     "oos_start": "2021-02-02",
+     "oos_end": "2021-08-21",
+     "status": "NO_VALIDATED_EDGE",
+     "selected": null,
+     "net_pnl": null
+    }
+   ]
+  },
+  {
+   "instrument": "GBP/USD",
+   "windows": 10,
+   "windows_traded": 3,
+   "windows_positive": 3,
+   "total_oos_net_pnl": 3529.04,
+   "per_window": [
+    {
+     "oos_start": "2016-02-29",
+     "oos_end": "2016-09-16",
+     "status": "PROMISING_NOT_TRADEABLE",
+     "selected": "breakout_60_GBPUSD_0",
+     "net_pnl": 2206.5
+    },
+    {
+     "oos_start": "2016-09-16",
+     "oos_end": "2017-04-04",
+     "status": "NO_VALIDATED_EDGE",
+     "selected": null,
+     "net_pnl": null
+    },
+    {
+     "oos_start": "2017-04-04",
+     "oos_end": "2017-10-21",
+     "status": "PROMISING_NOT_TRADEABLE",
+     "selected": "regime_filtered_breakout_20_GBPUSD_2",
+     "net_pnl": 405.47
+    },
+    {
+     "oos_start": "2017-10-21",
+     "oos_end": "2018-05-09",
+     "status": "NO_VALIDATED_EDGE",
+     "selected": null,
+     "net_pnl": null
+    },
+    {
+     "oos_start": "2018-05-09",
+     "oos_end": "2018-11-25",
+     "status": "NO_VALIDATED_EDGE",
+     "selected": null,
+     "net_pnl": null
+    },
+    {
+     "oos_start": "2018-11-25",
+     "oos_end": "2019-06-13",
+     "status": "NO_VALIDATED_EDGE",
+     "selected": null,
+     "net_pnl": null
+    },
+    {
+     "oos_start": "2019-06-13",
+     "oos_end": "2019-12-30",
+     "status": "RESEARCH_REQUIRED",
+     "selected": "breakout_20_GBPUSD_6",
+     "net_pnl": 917.07
+    },
+    {
+     "oos_start": "2019-12-30",
+     "oos_end": "2020-07-17",
+     "status": "NO_VALIDATED_EDGE",
+     "selected": null,
+     "net_pnl": null
+    },
+    {
+     "oos_start": "2020-07-17",
+     "oos_end": "2021-02-02",
+     "status": "NO_VALIDATED_EDGE",
+     "selected": null,
+     "net_pnl": null
+    },
+    {
+     "oos_start": "2021-02-02",
+     "oos_end": "2021-08-21",
+     "status": "NO_VALIDATED_EDGE",
+     "selected": null,
+     "net_pnl": null
+    }
+   ]
+  },
+  {
+   "instrument": "XAU/USD",
+   "windows": 11,
+   "windows_traded": 9,
+   "windows_positive": 9,
+   "total_oos_net_pnl": 8113.22,
+   "per_window": [
+    {
+     "oos_start": "2015-08-30",
+     "oos_end": "2016-03-17",
+     "status": "RESEARCH_REQUIRED",
+     "selected": "momentum_30_XAUUSD_0",
+     "net_pnl": 551.52
+    },
+    {
+     "oos_start": "2016-03-17",
+     "oos_end": "2016-10-03",
+     "status": "RESEARCH_REQUIRED",
+     "selected": "momentum_20_XAUUSD_1",
+     "net_pnl": 384.19
+    },
+    {
+     "oos_start": "2016-10-03",
+     "oos_end": "2017-04-21",
+     "status": "RESEARCH_REQUIRED",
+     "selected": "momentum_20_XAUUSD_2",
+     "net_pnl": 550.68
+    },
+    {
+     "oos_start": "2017-04-21",
+     "oos_end": "2017-11-07",
+     "status": "RESEARCH_REQUIRED",
+     "selected": "momentum_20_XAUUSD_3",
+     "net_pnl": 497.26
+    },
+    {
+     "oos_start": "2017-11-07",
+     "oos_end": "2018-05-26",
+     "status": "PROMISING_NOT_TRADEABLE",
+     "selected": "sma_crossover_(5, 20)_XAUUSD_4",
+     "net_pnl": 650.43
+    },
+    {
+     "oos_start": "2018-05-26",
+     "oos_end": "2018-12-12",
+     "status": "NO_VALIDATED_EDGE",
+     "selected": null,
+     "net_pnl": null
+    },
+    {
+     "oos_start": "2018-12-12",
+     "oos_end": "2019-06-30",
+     "status": "PROMISING_NOT_TRADEABLE",
+     "selected": "sma_crossover_(5, 20)_XAUUSD_6",
+     "net_pnl": 210.46
+    },
+    {
+     "oos_start": "2019-06-30",
+     "oos_end": "2020-01-16",
+     "status": "NO_VALIDATED_EDGE",
+     "selected": null,
+     "net_pnl": null
+    },
+    {
+     "oos_start": "2020-01-16",
+     "oos_end": "2020-08-03",
+     "status": "RESEARCH_REQUIRED",
+     "selected": "breakout_40_XAUUSD_8",
+     "net_pnl": 3075.84
+    },
+    {
+     "oos_start": "2020-08-03",
+     "oos_end": "2021-02-19",
+     "status": "PROMISING_NOT_TRADEABLE",
+     "selected": "breakout_40_XAUUSD_9",
+     "net_pnl": 1554.01
+    },
+    {
+     "oos_start": "2021-02-19",
+     "oos_end": "2021-09-07",
+     "status": "RESEARCH_REQUIRED",
+     "selected": "sma_crossover_(20, 100)_XAUUSD_10",
+     "net_pnl": 638.83
+    }
+   ]
+  }
+ ],
+ "experiment_3b": {
+  "run_date": "2026-09-25",
+  "title": "Experiment 3B: gold with real costs + unseen 2024\u20132026 data",
+  "cost_note": "Earlier gold tests charged $0.0001/oz per trade. Real spreads measured in 2024\u201326 ticks: median $0.16\u20130.26/oz. BASE here = $0.35 spread + $0.05 slippage per side.",
+  "rows": [
+   {
+    "strategy": "Breakout 30",
+    "hist_old_cost_pf": 1.165,
+    "hist_real_cost_pf": 1.1,
+    "fwd_real_cost_pf": 1.252,
+    "fwd_trades": 317,
+    "fwd_long_pf": 1.81,
+    "fwd_short_pf": 0.81,
+    "hist_1pct_annual": 6.6,
+    "hist_1pct_maxdd": 52.8,
+    "fwd_1pct_annual": 14.8,
+    "fwd_1pct_maxdd": 17.8
+   },
+   {
+    "strategy": "Breakout 40",
+    "hist_old_cost_pf": 1.146,
+    "hist_real_cost_pf": 1.086,
+    "fwd_real_cost_pf": 1.357,
+    "fwd_trades": 272,
+    "fwd_long_pf": 1.81,
+    "fwd_short_pf": 0.92,
+    "hist_1pct_annual": 5.8,
+    "hist_1pct_maxdd": 48.9,
+    "fwd_1pct_annual": 27.4,
+    "fwd_1pct_maxdd": 22.2
+   },
+   {
+    "strategy": "Breakout 50",
+    "hist_old_cost_pf": 1.135,
+    "hist_real_cost_pf": 1.077,
+    "fwd_real_cost_pf": 1.285,
+    "fwd_trades": 244,
+    "fwd_long_pf": 1.84,
+    "fwd_short_pf": 0.76,
+    "hist_1pct_annual": 5.9,
+    "hist_1pct_maxdd": 27.5,
+    "fwd_1pct_annual": 11.0,
+    "fwd_1pct_maxdd": 27.5
+   }
+  ],
+  "half_years_b40": {
+   "2024-H1": {
+    "trades": 62,
+    "net_pnl": -1623.08
+   },
+   "2024-H2": {
+    "trades": 49,
+    "net_pnl": 2716.75
+   },
+   "2025-H1": {
+    "trades": 48,
+    "net_pnl": 2541.24
+   },
+   "2025-H2": {
+    "trades": 43,
+    "net_pnl": 5483.83
+   },
+   "2026-H1": {
+    "trades": 47,
+    "net_pnl": 3768.49
+   },
+   "2026-H2": {
+    "trades": 23,
+    "net_pnl": 904.96
+   }
+  },
+  "verdict": "Edge held on unseen data, but it is regime-dependent (profit came from long trades in a strong gold uptrend) and fragile (the 5 best trades made nearly all the profit). Good enough to paper trade live. Not good enough for real money yet."
+ }
+}
