@@ -19,8 +19,9 @@ export default function Paper() {
   const risk = useApi<RiskMetrics>('/risk/metrics');
   const perf = useApi<Performance>('/performance');
   const events = useApi<EngineEvent[]>('/events');
+  const validation = useApi<import('../lib/types').PaperValidation>('/validation');
   const loading = account.loading || open.loading || closed.loading;
-  const reloadAll = () => [account, open, closed, risk, perf, events].forEach((x) => x.reload());
+  const reloadAll = () => [account, open, closed, risk, perf, events, validation].forEach((x) => x.reload());
   const a = account.data;
 
   return (
@@ -34,6 +35,37 @@ export default function Paper() {
           <Notice tone="info">{a.note}</Notice>
         </div>
       )}
+
+      <div className="mb-4">
+        <Card title="Paper-trading safety validation" subtitle="Synthetic software-path check · no broker contact · no persistent account changes">
+          {validation.loading && !validation.data ? (
+            <LoadingBlock rows={3} />
+          ) : validation.error && !validation.data ? (
+            <ErrorBlock error={validation.error} onRetry={validation.reload} />
+          ) : validation.data ? (
+            <>
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                <Stat label="Suite" value={validation.data.suite.replace(/-/g, ' ')} />
+                <Stat label="Status" value={validation.data.status} tone={validation.data.status === 'PASS' ? 'up' : 'down'} />
+                <Stat label="Broker contact" value={validation.data.real_broker_contacted ? 'Yes' : 'No'} />
+                <Stat label="State changed" value={validation.data.persistent_state_changed ? 'Yes' : 'No'} />
+              </div>
+              <div className="mt-4 space-y-2">
+                {validation.data.checks.map((check) => (
+                  <div key={check.name} className="rounded-xl border border-line bg-panel-2 p-3">
+                    <div className="flex items-center justify-between gap-3 text-xs">
+                      <span className="font-medium">{humanize(check.name)}</span>
+                      <Pill tone={check.passed ? 'good' : 'bad'}>{check.passed ? 'PASS' : 'FAIL'}</Pill>
+                    </div>
+                    <div className="mt-1 text-[11px] leading-relaxed text-muted">{check.detail}</div>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-3 text-[11px] leading-relaxed text-faint">{validation.data.note}</div>
+            </>
+          ) : null}
+        </Card>
+      </div>
 
       <section className="rounded-2xl border border-line bg-panel p-4 sm:p-5">
         {account.loading && !a ? (

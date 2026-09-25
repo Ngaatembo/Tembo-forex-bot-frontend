@@ -378,3 +378,23 @@ export interface LiveDecision {
     note: string;
   };
 }
+
+export interface PaperValidationCheck {
+  name: string;
+  expected: string;
+  actual: string;
+  passed: boolean;
+  detail: string;
+}
+
+export interface PaperValidation {
+  suite: string;
+  status: 'PASS' | 'FAIL' | string;
+  synthetic: boolean;
+  persistent_state_changed: boolean;
+  real_broker_contacted: boolean;
+  execution_enabled: boolean;
+  checked_at: string;
+  checks: PaperValidationCheck[];
+  note: string;
+}
