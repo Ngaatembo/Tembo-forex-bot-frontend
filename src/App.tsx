@@ -1,5 +1,5 @@
 import { useEffect, useState, type ComponentType } from 'react';
-import { LayoutDashboard, Scale, CandlestickChart, Wallet, FlaskConical, Newspaper, ShieldCheck } from 'lucide-react';
+import { Activity, LayoutDashboard, Scale, CandlestickChart, Wallet, FlaskConical, Newspaper, ShieldCheck } from 'lucide-react';
 import { API_BASE_URL, onWakeChange, useApi } from './lib/api';
 import type { Health } from './lib/types';
 import { Dot } from './components/ui';
@@ -9,11 +9,13 @@ import Markets from './pages/Markets';
 import Paper from './pages/Paper';
 import Research from './pages/Research';
 import News from './pages/News';
+import Live from './pages/Live';
 
-type RouteKey = 'overview' | 'decisions' | 'markets' | 'paper' | 'research' | 'news';
+type RouteKey = 'overview' | 'decisions' | 'markets' | 'paper' | 'research' | 'news' | 'live';
 
 const ROUTES: { key: RouteKey; label: string; short: string; icon: ComponentType<{ className?: string }>; page: ComponentType<{ go: (r: string) => void }> }[] = [
   { key: 'overview', label: 'Overview', short: 'Home', icon: LayoutDashboard, page: Overview },
+  { key: 'live', label: 'Live cockpit', short: 'Live', icon: Activity, page: Live },
   { key: 'decisions', label: 'Decisions', short: 'Decide', icon: Scale, page: Decisions },
   { key: 'markets', label: 'Markets', short: 'Markets', icon: CandlestickChart, page: Markets },
   { key: 'paper', label: 'Paper account', short: 'Paper', icon: Wallet, page: Paper },
