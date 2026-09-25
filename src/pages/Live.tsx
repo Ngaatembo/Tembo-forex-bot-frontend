@@ -38,7 +38,7 @@ function TradePlan({ plan }: { plan: LiveOverview['trade_plan'] }) {
   );
 }
 
-export default function Live() {
+export default function Live({ go: _go }: { go?: (r: string) => void }) {
   const [instrument, setInstrument] = useState<string>(INSTRUMENTS[0]);
   const [timeframe, setTimeframe] = useState('H1');
   const data = useApi<LiveOverview>(`/live/overview?instrument=${encodeURIComponent(instrument)}&timeframe=${timeframe.toLowerCase()}`);
