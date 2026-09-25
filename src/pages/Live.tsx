@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Activity, AlertTriangle, ArrowRight, BarChart3, CalendarClock, Crosshair, LineChart, ShieldCheck, Zap } from 'lucide-react';
 import { useApi } from '../lib/api';
-import type { LiveAnalysis, LiveMarket, LiveOverview, MultiTimeframeAnalysis } from '../lib/types';
+import type { LiveAnalysis, LiveDecision, LiveMarket, LiveOverview, MultiTimeframeAnalysis } from '../lib/types';
 import { INSTRUMENTS, dateTime, humanize, price, toneFor } from '../lib/format';
 import { Card, ErrorBlock, LoadingBlock, PageHeader, Pill, Stat } from '../components/ui';
 
@@ -149,6 +149,73 @@ function AnalysisWorkspace({ instrument, timeframe }: { instrument: string; time
   );
 }
 
+function DecisionWorkspace({ instrument, timeframe }: { instrument: string; timeframe: string }) {
+  const decision = useApi<LiveDecision>(
+    `/live/decision?instrument=${encodeURIComponent(instrument)}&timeframe=${timeframe.toLowerCase()}`,
+  );
+  const plan = decision.data?.trade_plan;
+
+  return (
+    <Card title="Multi-factor decision" subtitle="Technical evidence + candlestick evidence + macro risk · read-only">
+      {decision.loading && !decision.data ? <LoadingBlock rows={5} /> : decision.error && !decision.data ? (
+        <ErrorBlock error={decision.error} onRetry={decision.reload} />
+      ) : (
+        <>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            <Stat label="Decision" value={humanize(decision.data?.decision)} />
+            <Stat label="Confidence" value={plan ? `${plan.confidence.toFixed(0)} / 100` : '—'} />
+            <Stat label="Risk / reward" value={plan?.risk_reward != null ? `1:${plan.risk_reward.toFixed(1)}` : '—'} />
+            <Stat label="Macro risk" value={humanize(decision.data?.macro_risk?.level)} />
+          </div>
+
+          {plan ? (
+            <>
+              <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
+                <Stat label="Entry" value={price(plan.entry, instrument)} />
+                <Stat label="Stop loss" value={price(plan.stop_loss, instrument)} />
+                <Stat label="Take profit" value={price(plan.take_profit, instrument)} />
+                <Stat label="Direction" value={humanize(plan.direction)} />
+              </div>
+
+              <div className="mt-4 grid gap-2 sm:grid-cols-2">
+                {plan.factors.map((factor) => (
+                  <div key={factor.name} className="rounded-xl border border-line bg-panel-2 p-3">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="font-medium">{humanize(factor.name)}</span>
+                      <span className="num">{factor.score.toFixed(0)} /  {factor.direction}</span>
+                    </div>
+                    <p className="mt-1 text-[11px] leading-relaxed text-muted">{factor.reason}</p>
+                  </div>
+                ))}
+              </div>
+
+              {plan.rejection_reasons.length > 0 && (
+                <div className="mt-4 rounded-xl border border-warn/25 bg-warn-soft/40 p-3 text-xs leading-relaxed">
+                  <div className="font-medium">Decision restrictions</div>
+                  <ul className="mt-1 list-disc space-y-1 pl-4 text-muted">
+                    {plan.rejection_reasons.map((reason) => <li key={reason}>{reason}</li>)}
+                  </ul>
+                </div>
+              )}
+            </>
+          ) : (
+            <div className="mt-4 rounded-xl border border-dashed border-line-2 bg-panel-2 p-4 text-xs leading-relaxed text-muted">
+              {decision.data?.message ?? 'Waiting for verified market data.'}
+            </div>
+          )}
+
+          {decision.data?.macro_risk && (
+            <div className="mt-4 rounded-xl border border-line bg-panel-2 p-3 text-xs leading-relaxed text-muted">
+              <div className="font-medium text-fg">Economic calendar guard · {humanize(decision.data.macro_risk.level)}</div>
+              <div className="mt-1">{decision.data.macro_risk.reason}</div>
+            </div>
+          )}
+        </>
+      )}
+    </Card>
+  );
+}
+
 function MarketWorkspace({ instrument, timeframe }: { instrument: string; timeframe: string }) {
   const market = useApi<LiveMarket>(`/live/market?instrument=${encodeURIComponent(instrument)}&timeframe=${timeframe.toLowerCase()}&limit=120`);
 
@@ -230,6 +297,10 @@ export default function Live({ go: _go }: { go?: (r: string) => void }) {
 
           <div className="mt-4">
             <AnalysisWorkspace instrument={instrument} timeframe={timeframe} />
+          </div>
+
+          <div className="mt-4">
+            <DecisionWorkspace instrument={instrument} timeframe={timeframe} />
           </div>
 
           <div className="mt-4 grid gap-4 lg:grid-cols-2">
