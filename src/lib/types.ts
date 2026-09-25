@@ -334,3 +334,47 @@ export interface MultiTimeframeAnalysis {
   message: string;
   timeframes: Record<string, LiveAnalysis['analysis'] | { status: string; reason: string } | null>;
 }
+
+
+export interface LiveDecision {
+  instrument: string;
+  timeframe: string;
+  provider: string;
+  status: string;
+  decision: string;
+  methodology?: string;
+  macro_risk?: {
+    level: string;
+    reason: string;
+    triggering_event_count: number;
+  };
+  data_quality?: {
+    is_clean: boolean;
+    candle_count: number;
+    last_candle?: string;
+    ohlc_violations?: number;
+    duplicate_timestamps?: number;
+    unexpected_gaps?: number;
+  };
+  trade_plan: {
+    decision: string;
+    direction: string;
+    confidence: number;
+    entry: number | null;
+    stop_loss: number | null;
+    take_profit: number | null;
+    risk_reward: number | null;
+    factors: Array<{
+      name: string;
+      score: number;
+      direction: string;
+      reason: string;
+    }>;
+    rejection_reasons: string[];
+    methodology: string;
+  } | null;
+  execution?: {
+    enabled: boolean;
+    note: string;
+  };
+}
