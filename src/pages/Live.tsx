@@ -148,11 +148,6 @@ function AnalysisWorkspace({ instrument, timeframe }: { instrument: string; time
           <Pill tone={multi.data?.status === 'available' ? 'good' : 'warn'}>{humanize(multi.data?.status)}</Pill>
         </div>}
         {showMulti && <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
-          <div>
-            <div className="text-xs font-medium text-fg">Multi-timeframe context</div>
-            <div className="text-[11px] text-muted">Same deterministic engine across M5 → D1</div>
-          </div>
-
           {['m5','m15','h1','h4','d1'].map((tf) => {
             const value = multi.data?.timeframes?.[tf];
             const state = value && 'trend' in value ? value.trend?.state ?? 'Waiting' : value?.status ?? 'Waiting';
