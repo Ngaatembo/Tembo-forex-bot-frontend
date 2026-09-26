@@ -1,5 +1,5 @@
 import { useApi } from '../lib/api';
-import type { PaperValidation, RuntimeEvent, RuntimeMetrics, RuntimeStatus } from '../lib/types';
+import type { BacktestReadiness, PaperValidation, RuntimeEvent, RuntimeMetrics, RuntimeStatus } from '../lib/types';
 import { Card, Empty, ErrorBlock, KV, LoadingBlock, Notice, PageHeader, Pill, RefreshButton, Stat } from '../components/ui';
 import { dateTime, money, pct, humanize } from '../lib/format';
 
@@ -18,9 +18,10 @@ export default function TestLab({ go }: { go: (r: string) => void }) {
   const status = useApi<RuntimeStatus>('/runtime/status');
   const metrics = useApi<RuntimeMetrics>('/runtime/metrics');
   const events = useApi<RuntimeEvent[]>('/runtime/events?limit=12');
+  const backtest = useApi<BacktestReadiness>('/backtests/readiness');
 
-  const loading = validation.loading || status.loading || metrics.loading || events.loading;
-  const reload = () => [validation, status, metrics, events].forEach((x) => x.reload());
+  const loading = validation.loading || status.loading || metrics.loading || events.loading || backtest.loading;
+  const reload = () => [validation, status, metrics, events, backtest].forEach((x) => x.reload());
 
   const suitePass = validation.data?.status === 'PASS';
   const runtimeRunning = status.data?.status === 'RUNNING';
@@ -73,6 +74,34 @@ export default function TestLab({ go }: { go: (r: string) => void }) {
         </Card>
       </div>
 
+
+      <div className="mt-4">
+        <Card title="Backtest readiness" subtitle="Historical data required by the simulation engine">
+          {backtest.loading && !backtest.data ? <LoadingBlock rows={2} /> : backtest.error && !backtest.data ? <ErrorBlock error={backtest.error} onRetry={backtest.reload} /> : backtest.data ? (
+            <>
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <div className="text-sm font-medium">{backtest.data.ready ? 'Historical data available' : 'Historical data not loaded'}</div>
+                  <div className="mt-1 text-xs text-muted">{backtest.data.stored_candles} stored candles across {backtest.data.datasets.length} dataset{backtest.data.datasets.length === 1 ? '' : 's'}.</div>
+                </div>
+                <Pill tone={backtest.data.ready ? 'good' : 'warn'}>{backtest.data.ready ? 'READY' : 'NOT READY'}</Pill>
+              </div>
+              <p className="mt-3 text-[11px] leading-relaxed text-muted">{backtest.data.note}</p>
+              {backtest.data.datasets.length > 0 && (
+                <div className="mt-3 grid gap-2 sm:grid-cols-3">
+                  {backtest.data.datasets.map((dataset) => (
+                    <div key={`${dataset.symbol}-${dataset.timeframe}`} className="rounded-xl border border-line bg-panel-2 p-3">
+                      <div className="num text-xs font-medium">{dataset.symbol} · {dataset.timeframe}</div>
+                      <div className="mt-1 text-[11px] text-muted">{dataset.candle_count} candles</div>
+                      <div className="mt-1 text-[10px] text-faint">{dataset.first_candle ? dateTime(dataset.first_candle) : '—'} → {dataset.last_candle ? dateTime(dataset.last_candle) : '—'}</div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </>
+          ) : null}
+        </Card>
+      </div>
       <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
         <Card title="Synthetic safety checks" subtitle="In-memory only · no persistent state changes">
           {validation.loading && !validation.data ? <LoadingBlock rows={5} /> : validation.error && !validation.data ? <ErrorBlock error={validation.error} onRetry={validation.reload} /> : validation.data ? (
