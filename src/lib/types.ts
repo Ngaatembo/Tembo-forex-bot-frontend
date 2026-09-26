@@ -241,27 +241,6 @@ export interface LiveOverview {
   market_data: { provider: string; status: string };
   context: { news: string; calendar: string };
   instruments: LiveInstrumentState[];
-  strategy_gate?: {
-    status: string;
-    selected_config_id?: string | null;
-    reason: string;
-  };
-  risk?: {
-    status: string;
-    state?: string | null;
-    hierarchy_stage?: string | null;
-    computed_risk_pct?: number | null;
-    position_size?: number | null;
-    reason: string;
-  };
-  paper_eligibility?: {
-    eligible: boolean;
-    status: string;
-    reason: string;
-    persistent_state_changed: boolean;
-    real_broker_contacted: boolean;
-    execution_enabled: boolean;
-  };
   trade_plan: {
     instrument: string;
     decision: string;
@@ -377,6 +356,27 @@ export interface LiveDecision {
     ohlc_violations?: number;
     duplicate_timestamps?: number;
     unexpected_gaps?: number;
+  };
+  strategy_gate?: {
+    status: string;
+    selected_config_id?: string | null;
+    reason: string;
+  };
+  risk?: {
+    status: string;
+    state?: string | null;
+    hierarchy_stage?: string | null;
+    computed_risk_pct?: number | null;
+    position_size?: number | null;
+    reason: string;
+  };
+  paper_eligibility?: {
+    eligible: boolean;
+    status: string;
+    reason: string;
+    persistent_state_changed: boolean;
+    real_broker_contacted: boolean;
+    execution_enabled: boolean;
   };
   trade_plan: {
     decision: string;
