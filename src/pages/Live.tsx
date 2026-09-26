@@ -6,17 +6,25 @@ import { INSTRUMENTS, dateTime, humanize, price, toneFor } from '../lib/format';
 import { Card, ErrorBlock, LoadingBlock, PageHeader, Pill, Stat } from '../components/ui';
 
 function ConnectionBanner({ data }: { data: LiveOverview | null }) {
-  const live = data?.market_data.provider === 'mt5_bridge' && data.market_data.status === 'available';
+  const marketVerified = data?.market_data.status === 'available';
+  const mt5Configured = data?.mt5.status === 'configured';
+  const ready = marketVerified || mt5Configured;
   return (
-    <div className={`mb-4 flex items-start gap-3 rounded-2xl border px-4 py-3 ${live ? 'border-up/25 bg-up-soft/40' : 'border-warn/25 bg-warn-soft/40'}`}>
-      {live ? <Activity className="mt-0.5 h-5 w-5 shrink-0 text-up" /> : <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-warn" />}
+    <div className={`mb-4 flex items-start gap-3 rounded-2xl border px-4 py-3 ${ready ? 'border-up/25 bg-up-soft/40' : 'border-warn/25 bg-warn-soft/40'}`}>
+      {ready ? <Activity className="mt-0.5 h-5 w-5 shrink-0 text-up" /> : <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-warn" />}
       <div className="min-w-0">
-        <div className="text-sm font-medium">{live ? 'MT5 market connection verified' : 'Live market connection is not connected yet'}</div>
+        <div className="text-sm font-medium">
+          {marketVerified ? 'Market data connection verified' : mt5Configured ? 'MT5 bridge configured' : 'Live market data is not verified yet'}
+        </div>
         <p className="mt-0.5 text-xs leading-relaxed text-muted">
-          {live ? 'Tembo is receiving data through the MT5 bridge. Execution remains separately controlled.' : 'This cockpit is ready for live data, but it will never label mock or missing data as live. Connect the MT5 bridge after the laptop is ready.'}
+          {marketVerified
+            ? `Tembo is receiving validated market data through ${data?.market_data.provider ?? 'the configured provider'}. MT5 execution remains a separate integration and is still controlled by the execution guard.`
+            : mt5Configured
+              ? 'The MT5 bridge configuration exists, but terminal connectivity still needs verification. Execution remains disabled until the safety requirements are satisfied.'
+              : 'This cockpit fails closed: mock or missing market data is never presented as live. Connect and verify the market-data provider before relying on the cockpit.'}
         </p>
       </div>
-      <Pill tone={live ? 'good' : 'warn'}>{data?.mode ?? 'PREPARING'}</Pill>
+      <Pill tone={ready ? 'good' : 'warn'}>{data?.mode ?? 'PREPARING'}</Pill>
     </div>
   );
 }
