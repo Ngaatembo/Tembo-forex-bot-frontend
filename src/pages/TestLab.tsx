@@ -15,9 +15,9 @@ function ageLabel(iso: string | null) {
 
 export default function TestLab({ go }: { go: (r: string) => void }) {
   const validation = useApi<PaperValidation>('/validation');
-  const status = useApi<RuntimeStatus>('/paper/runtime/status');
-  const metrics = useApi<RuntimeMetrics>('/paper/runtime/metrics');
-  const events = useApi<RuntimeEvent[]>('/paper/runtime/events?limit=12');
+  const status = useApi<RuntimeStatus>('/runtime/status');
+  const metrics = useApi<RuntimeMetrics>('/runtime/metrics');
+  const events = useApi<RuntimeEvent[]>('/runtime/events?limit=12');
 
   const loading = validation.loading || status.loading || metrics.loading || events.loading;
   const reload = () => [validation, status, metrics, events].forEach((x) => x.reload());
