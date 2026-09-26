@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
-import { Activity, AlertTriangle, ArrowRight, BarChart3, CalendarClock, Crosshair, LineChart, ShieldCheck, Zap } from 'lucide-react';
+import { Activity, AlertTriangle, ArrowRight, BarChart3, CalendarClock, Crosshair, LineChart, ShieldCheck, Zap, Gauge } from 'lucide-react';
 import { useApi } from '../lib/api';
-import type { LiveAnalysis, LiveDecision, LiveMarket, LiveOverview, MultiTimeframeAnalysis } from '../lib/types';
+import type { LiveAnalysis, LiveDecision, LiveMarket, LiveOverview, MultiTimeframeAnalysis, RuntimeMetrics } from '../lib/types';
 import { INSTRUMENTS, dateTime, humanize, price, toneFor } from '../lib/format';
 import { Card, ErrorBlock, LoadingBlock, PageHeader, Pill, Stat } from '../components/ui';
 
@@ -90,7 +90,8 @@ function MarketChart({ data }: { data: LiveMarket | null }) {
 
 function AnalysisWorkspace({ instrument, timeframe }: { instrument: string; timeframe: string }) {
   const analysis = useApi<LiveAnalysis>(`/live/analysis?instrument=${encodeURIComponent(instrument)}&timeframe=${timeframe.toLowerCase()}`);
-  const multi = useApi<MultiTimeframeAnalysis>(`/live/analysis/multi-timeframe?instrument=${encodeURIComponent(instrument)}`);
+  const [showMulti, setShowMulti] = useState(false);
+  const multi = useApi<MultiTimeframeAnalysis>(showMulti ? `/live/analysis/multi-timeframe?instrument=${encodeURIComponent(instrument)}` : null);
 
   const item = analysis.data?.analysis;
   const cards = [
@@ -133,17 +134,31 @@ function AnalysisWorkspace({ instrument, timeframe }: { instrument: string; time
         <div className="mb-2 flex items-center justify-between">
           <div>
             <div className="text-xs font-medium text-fg">Multi-timeframe context</div>
+            <div className="text-[11px] text-muted">Loads on demand so the live cockpit does not exhaust the provider quota.</div>
+          </div>
+          <button
+            onClick={() => setShowMulti((v) => !v)}
+            className="rounded-lg border border-line bg-panel px-3 py-1.5 text-[11px] font-medium text-muted hover:text-fg"
+          >
+            {showMulti ? 'Hide' : 'Load M5 → D1'}
+          </button>
+        </div>
+        {showMulti && <div className="mb-2 flex items-center justify-between">
+          <div className="text-[11px] text-muted">Same deterministic engine across M5 → D1</div>
+          <Pill tone={multi.data?.status === 'available' ? 'good' : 'warn'}>{humanize(multi.data?.status)}</Pill>
+        </div>}
+        {showMulti && <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
+          <div>
+            <div className="text-xs font-medium text-fg">Multi-timeframe context</div>
             <div className="text-[11px] text-muted">Same deterministic engine across M5 → D1</div>
           </div>
-          <Pill tone={multi.data?.status === 'available' ? 'good' : 'warn'}>{humanize(multi.data?.status)}</Pill>
-        </div>
-        <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
+
           {['m5','m15','h1','h4','d1'].map((tf) => {
             const value = multi.data?.timeframes?.[tf];
             const state = value && 'trend' in value ? value.trend?.state ?? 'Waiting' : value?.status ?? 'Waiting';
             return <div key={tf} className="rounded-lg border border-line bg-panel p-2 text-center"><div className="text-[10px] text-muted">{tf.toUpperCase()}</div><div className="mt-1 text-xs font-medium">{humanize(state)}</div></div>;
           })}
-        </div>
+        </div>}
       </div>
     </Card>
   );
@@ -242,6 +257,24 @@ function MarketWorkspace({ instrument, timeframe }: { instrument: string; timefr
   );
 }
 
+function RuntimeTelemetry({ instrument }: { instrument: string }) {
+  const metrics = useApi<RuntimeMetrics>('/paper/runtime/metrics');
+  if (metrics.loading && !metrics.data) return <Card title="Paper runtime telemetry" subtitle="Persistent evidence from the live-data paper engine"><LoadingBlock rows={2} /></Card>;
+  if (metrics.error && !metrics.data) return <Card title="Paper runtime telemetry" subtitle="Persistent evidence from the live-data paper engine"><ErrorBlock error={metrics.error} onRetry={metrics.reload} /></Card>;
+  const p = metrics.data?.performance;
+  const instrumentEvents = metrics.data?.instrument_event_counts?.[instrument] ?? 0;
+  return <Card title="Paper runtime telemetry" subtitle="Persistent evidence from the live-data paper engine">
+    <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
+      <Stat label="Cycles" value={String(metrics.data?.cycles_observed ?? 0)} />
+      <Stat label="Events" value={String(metrics.data?.events_observed ?? 0)} />
+      <Stat label="Closed trades" value={String(p?.closed_trades ?? 0)} />
+      <Stat label="Realized P&L" value={`${(p?.realized_pnl ?? 0).toFixed(2)}`} />
+      <Stat label={`${instrument} events`} value={String(instrumentEvents)} />
+    </div>
+    <div className="mt-3 flex items-center gap-2 text-xs text-muted"><Gauge className="h-4 w-4 text-gold" /> {metrics.data?.execution_enabled ? 'Execution flag is ON — verify configuration.' : 'Paper-only: broker execution disabled and broker not contacted.'}</div>
+  </Card>;
+}
+
 export default function Live({ go: _go }: { go?: (r: string) => void }) {
   const [instrument, setInstrument] = useState<string>(INSTRUMENTS[0]);
   const [timeframe, setTimeframe] = useState('H1');
@@ -302,6 +335,8 @@ export default function Live({ go: _go }: { go?: (r: string) => void }) {
           <div className="mt-4">
             <DecisionWorkspace instrument={instrument} timeframe={timeframe} />
           </div>
+
+          <div className="mt-4"><RuntimeTelemetry instrument={instrument} /></div>
 
           <div className="mt-4 grid gap-4 lg:grid-cols-2">
             <TradePlan plan={data.data.trade_plan} />
