@@ -426,6 +426,20 @@ export interface RuntimeEvent {
   data_quality?: { is_clean?: boolean; candle_count?: number; last_candle?: string };
 }
 
+export interface BacktestDataset {
+  symbol: string;
+  timeframe: string;
+  candle_count: number;
+  first_candle: string | null;
+  last_candle: string | null;
+}
+
+export interface BacktestReadiness {
+  ready: boolean;
+  stored_candles: number;
+  datasets: BacktestDataset[];
+  note: string;
+}
 export interface RuntimeMetrics {
   mode: string;
   cycles_observed: number;
