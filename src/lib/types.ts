@@ -337,6 +337,7 @@ export interface MultiTimeframeAnalysis {
 
 
 export interface LiveDecision {
+  message?: string;
   instrument: string;
   timeframe: string;
   provider: string;
