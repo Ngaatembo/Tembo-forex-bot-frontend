@@ -401,6 +401,31 @@ export interface PaperValidation {
 }
 
 
+export interface RuntimeStatus {
+  status: string;
+  account_id: string;
+  initial_equity: number;
+  realized_pnl: number;
+  peak_equity: number;
+  open_positions: number;
+  last_cycle_at: string | null;
+  execution_enabled: boolean;
+  broker_contacted: boolean;
+}
+
+export interface RuntimeEvent {
+  level?: string;
+  created_at?: string | null;
+  instrument?: string;
+  timeframe?: string;
+  status?: string;
+  reason?: string;
+  decision?: string;
+  position_id?: string | null;
+  last_completed_candle?: string | null;
+  data_quality?: { is_clean?: boolean; candle_count?: number; last_candle?: string };
+}
+
 export interface RuntimeMetrics {
   mode: string;
   cycles_observed: number;
