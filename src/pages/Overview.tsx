@@ -62,7 +62,7 @@ function SystemCard() {
     ['News', data?.news_service],
     ['Database', data?.database],
     ['Paper broker', data?.paper_broker],
-    ['AI service', data?.ai_service],
+    ['AI analysis (optional)', data?.ai_service],
   ];
   return (
     <Card title="System" subtitle="Live status reported by the backend">
@@ -82,6 +82,9 @@ function SystemCard() {
             <span className="text-muted">Live execution</span>
             <Pill tone={data?.live_execution_enabled ? 'bad' : 'good'}>{data?.live_execution_enabled ? 'Enabled' : 'Disabled'}</Pill>
           </div>
+          <p className="mt-3 border-t border-line pt-3 text-[11px] leading-relaxed text-muted">
+            AI analysis is an advisory layer for interpreting research/news context. It is not required for the deterministic decision or paper-risk gates, and it cannot execute trades.
+          </p>
         </div>
       )}
     </Card>
