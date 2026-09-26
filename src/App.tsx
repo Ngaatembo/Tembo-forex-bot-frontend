@@ -10,8 +10,9 @@ import Paper from './pages/Paper';
 import Research from './pages/Research';
 import News from './pages/News';
 import Live from './pages/Live';
+import TestLab from './pages/TestLab';
 
-type RouteKey = 'overview' | 'decisions' | 'markets' | 'paper' | 'research' | 'news' | 'live';
+type RouteKey = 'overview' | 'decisions' | 'markets' | 'paper' | 'research' | 'news' | 'live' | 'test-lab';
 
 const ROUTES: { key: RouteKey; label: string; short: string; icon: ComponentType<{ className?: string }>; page: ComponentType<{ go: (r: string) => void }> }[] = [
   { key: 'overview', label: 'Overview', short: 'Home', icon: LayoutDashboard, page: Overview },
@@ -21,6 +22,7 @@ const ROUTES: { key: RouteKey; label: string; short: string; icon: ComponentType
   { key: 'paper', label: 'Paper account', short: 'Paper', icon: Wallet, page: Paper },
   { key: 'research', label: 'Research', short: 'Research', icon: FlaskConical, page: Research },
   { key: 'news', label: 'News & calendar', short: 'News', icon: Newspaper, page: News },
+  { key: 'test-lab', label: 'Test lab', short: 'Test', icon: ShieldCheck, page: TestLab },
 ];
 
 function parseHash(): { route: RouteKey } {
@@ -147,7 +149,7 @@ export default function App() {
 
       {/* Mobile bottom nav */}
       <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-line bg-ink/95 pb-[env(safe-area-inset-bottom)] backdrop-blur lg:hidden">
-        <div className="mx-auto grid max-w-lg grid-cols-7">
+        <div className="mx-auto grid max-w-lg grid-cols-4 sm:grid-cols-8">
           {ROUTES.map((r) => {
             const active = r.key === route;
             return (
