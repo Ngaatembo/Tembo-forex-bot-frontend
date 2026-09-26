@@ -398,3 +398,32 @@ export interface PaperValidation {
   checks: PaperValidationCheck[];
   note: string;
 }
+
+
+export interface RuntimeMetrics {
+  mode: string;
+  cycles_observed: number;
+  events_observed: number;
+  decision_status_counts: Record<string, number>;
+  rejection_reason_counts: Record<string, number>;
+  instrument_event_counts: Record<string, number>;
+  performance: {
+    closed_trades: number;
+    wins: number;
+    losses: number;
+    win_rate: number | null;
+    realized_pnl: number;
+    gross_profit: number;
+    gross_loss: number;
+    profit_factor: number | null;
+    by_instrument: Record<string, {
+      trades: number;
+      realized_pnl: number;
+      wins: number;
+      losses: number;
+    }>;
+  };
+  execution_enabled: boolean;
+  broker_contacted: boolean;
+  note: string;
+}
