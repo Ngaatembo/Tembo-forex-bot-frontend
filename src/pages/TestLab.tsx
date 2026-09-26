@@ -1,5 +1,5 @@
 import { useApi } from '../lib/api';
-import type { BacktestReadiness, PaperValidation, RuntimeEvent, RuntimeMetrics, RuntimeStatus } from '../lib/types';
+import type { BacktestReadiness, LiveDecision, PaperValidation, RuntimeEvent, RuntimeMetrics, RuntimeStatus } from '../lib/types';
 import { Card, Empty, ErrorBlock, KV, LoadingBlock, Notice, PageHeader, Pill, RefreshButton, Stat } from '../components/ui';
 import { dateTime, money, pct, humanize } from '../lib/format';
 
@@ -19,9 +19,10 @@ export default function TestLab({ go }: { go: (r: string) => void }) {
   const metrics = useApi<RuntimeMetrics>('/runtime/metrics');
   const events = useApi<RuntimeEvent[]>('/runtime/events?limit=12');
   const backtest = useApi<BacktestReadiness>('/backtests/readiness');
+  const decision = useApi<LiveDecision>('/live/decision?instrument=EUR%2FUSD&timeframe=h1');
 
-  const loading = validation.loading || status.loading || metrics.loading || events.loading || backtest.loading;
-  const reload = () => [validation, status, metrics, events, backtest].forEach((x) => x.reload());
+  const loading = validation.loading || status.loading || metrics.loading || events.loading || backtest.loading || decision.loading;
+  const reload = () => [validation, status, metrics, events, backtest, decision].forEach((x) => x.reload());
 
   const suitePass = validation.data?.status === 'PASS';
   const runtimeRunning = status.data?.status === 'RUNNING';
@@ -75,6 +76,42 @@ export default function TestLab({ go }: { go: (r: string) => void }) {
       </div>
 
 
+
+      <div className="mt-4">
+        <Card title="Decision-chain verification" subtitle="EUR/USD H1 · read-only live-data check">
+          {decision.loading && !decision.data ? <LoadingBlock rows={4} /> : decision.error && !decision.data ? <ErrorBlock error={decision.error} onRetry={decision.reload} /> : decision.data ? (
+            <>
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
+                <Stat label="Decision" value={humanize(decision.data.decision)} />
+                <Stat label="Candles" value={String(decision.data.data_quality?.candle_count ?? '—')} />
+                <Stat label="Macro" value={humanize(decision.data.macro_risk?.level)} />
+                <Stat label="Strategy" value={humanize(decision.data.strategy_gate?.status)} />
+                <Stat label="Paper gate" value={humanize(decision.data.paper_eligibility?.status)} />
+              </div>
+              <div className="mt-3 grid gap-2 sm:grid-cols-3">
+                <div className="rounded-xl border border-line bg-panel-2 p-3 text-xs">
+                  <div className="font-medium">Data integrity</div>
+                  <div className="mt-1 text-muted">{decision.data.data_quality?.is_clean ? 'Validated completed candles' : 'Data rejected'}</div>
+                  <div className="mt-1 text-[10px] text-faint">Last candle: {decision.data.data_quality?.last_candle ? dateTime(decision.data.data_quality.last_candle) : '—'}</div>
+                </div>
+                <div className="rounded-xl border border-line bg-panel-2 p-3 text-xs">
+                  <div className="font-medium">Risk layer</div>
+                  <div className="mt-1 text-muted">{humanize(decision.data.risk?.state ?? 'NOT_RUN')}</div>
+                  <div className="mt-1 text-[10px] text-faint">{decision.data.risk?.reason ?? 'No risk evaluation reached.'}</div>
+                </div>
+                <div className="rounded-xl border border-line bg-panel-2 p-3 text-xs">
+                  <div className="font-medium">Eligibility</div>
+                  <div className="mt-1 text-muted">{decision.data.paper_eligibility?.eligible ? 'Paper trade eligible' : 'Not paper eligible'}</div>
+                  <div className="mt-1 text-[10px] text-faint">{decision.data.paper_eligibility?.reason ?? decision.data.message ?? 'No eligibility result.'}</div>
+                </div>
+              </div>
+              <div className="mt-3 rounded-xl border border-line bg-panel-2 p-3 text-[11px] leading-relaxed text-muted">
+                {decision.data.message ?? 'Decision chain completed.'}
+              </div>
+            </>
+          ) : null}
+        </Card>
+      </div>
       <div className="mt-4">
         <Card title="Backtest readiness" subtitle="Historical data required by the simulation engine">
           {backtest.loading && !backtest.data ? <LoadingBlock rows={2} /> : backtest.error && !backtest.data ? <ErrorBlock error={backtest.error} onRetry={backtest.reload} /> : backtest.data ? (
