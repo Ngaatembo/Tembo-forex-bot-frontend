@@ -261,7 +261,7 @@ function MarketWorkspace({ instrument, timeframe }: { instrument: string; timefr
 }
 
 function RuntimeTelemetry({ instrument }: { instrument: string }) {
-  const metrics = useApi<RuntimeMetrics>('/paper/runtime/metrics');
+  const metrics = useApi<RuntimeMetrics>('/runtime/metrics');
   if (metrics.loading && !metrics.data) return <Card title="Paper runtime telemetry" subtitle="Persistent evidence from the live-data paper engine"><LoadingBlock rows={2} /></Card>;
   if (metrics.error && !metrics.data) return <Card title="Paper runtime telemetry" subtitle="Persistent evidence from the live-data paper engine"><ErrorBlock error={metrics.error} onRetry={metrics.reload} /></Card>;
   const p = metrics.data?.performance;
