@@ -1,128 +1,188 @@
-import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import { useEffect, useMemo, useState } from 'react';
 import { enc, useApi } from '../lib/api';
-import type { Market } from '../lib/types';
+import type { LiveMarket } from '../lib/types';
 import { INSTRUMENTS, dateTime, humanize, price, shortTime } from '../lib/format';
 import { useInstrumentParam } from '../lib/route';
 import { Card, Empty, ErrorBlock, KV, LoadingBlock, Notice, PageHeader, Pill, RefreshButton, Segmented, Stat } from '../components/ui';
 
-function PriceChart({ m }: { m: Market }) {
-  const data = m.recent_candles.map((c) => ({ t: c.timestamp, close: c.close }));
-  const closes = data.map((d) => d.close);
-  const min = Math.min(...closes);
-  const max = Math.max(...closes);
-  const pad = (max - min) * 0.15 || max * 0.001;
-  const first = closes[0];
-  const last = closes[closes.length - 1];
-  const up = last >= first;
-  const stroke = up ? '#3ecf8e' : '#f06a6a';
+function CandleChart({ data }: { data: LiveMarket }) {
+  const candles = data.candles;
+  const points = useMemo(() => {
+    if (!candles.length) return null;
+    const highs = candles.map((c) => c.high);
+    const lows = candles.map((c) => c.low);
+    const min = Math.min(...lows);
+    const max = Math.max(...highs);
+    const span = max - min || 1;
+    const width = 1000;
+    const height = 360;
+    const left = 12;
+    const right = 18;
+    const top = 12;
+    const bottom = 28;
+    const plotW = width - left - right;
+    const plotH = height - top - bottom;
+    const step = plotW / Math.max(candles.length, 1);
+    const bodyW = Math.max(2, Math.min(9, step * 0.62));
+
+    const y = (v: number) => top + (1 - (v - min) / span) * plotH;
+    const x = (i: number) => left + i * step + step / 2;
+
+    return {
+      min,
+      max,
+      items: candles.map((c, i) => {
+        const openY = y(c.open);
+        const closeY = y(c.close);
+        return {
+          ...c,
+          x: x(i),
+          highY: y(c.high),
+          lowY: y(c.low),
+          bodyTop: Math.min(openY, closeY),
+          bodyHeight: Math.max(1.5, Math.abs(closeY - openY)),
+          bodyW,
+          up: c.close >= c.open,
+        };
+      }),
+      y,
+      height,
+      width,
+    };
+  }, [candles]);
+
+  if (!points) return <Empty title="No candles">Waiting for verified market data.</Empty>;
+
   return (
-    <div className="h-64 w-full sm:h-72" role="img" aria-label={`${m.instrument} closing prices, last ${data.length} hours`}>
-      <ResponsiveContainer width="100%" height="100%">
-        <AreaChart data={data} margin={{ top: 8, right: 8, bottom: 0, left: 0 }}>
-          <defs>
-            <linearGradient id="px" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor={stroke} stopOpacity={0.22} />
-              <stop offset="100%" stopColor={stroke} stopOpacity={0} />
-            </linearGradient>
-          </defs>
-          <CartesianGrid stroke="#222a36" strokeDasharray="0" vertical={false} />
-          <XAxis
-            dataKey="t"
-            tickFormatter={(t: string) => new Date(t).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}
-            tick={{ fill: '#5d6776', fontSize: 10 }}
-            axisLine={false}
-            tickLine={false}
-            minTickGap={40}
-          />
-          <YAxis
-            domain={[min - pad, max + pad]}
-            tickFormatter={(v: number) => price(v, m.instrument)}
-            tick={{ fill: '#5d6776', fontSize: 10, fontFamily: 'JetBrains Mono' }}
-            axisLine={false}
-            tickLine={false}
-            width={m.instrument.startsWith('XAU') ? 62 : 58}
-            orientation="right"
-          />
-          <Tooltip
-            cursor={{ stroke: '#5d6776', strokeWidth: 1 }}
-            contentStyle={{ background: '#161c26', border: '1px solid #2c3544', borderRadius: 10, fontSize: 12 }}
-            labelStyle={{ color: '#8b95a5' }}
-            itemStyle={{ color: '#e8ecf2', fontFamily: 'JetBrains Mono' }}
-            labelFormatter={(t) => dateTime(String(t))}
-            formatter={(v) => [price(Number(v), m.instrument), 'Close']}
-          />
-          <Area type="monotone" dataKey="close" isAnimationActive={false} stroke={stroke} strokeWidth={2} fill="url(#px)" activeDot={{ r: 4, stroke: '#11161e', strokeWidth: 2 }} />
-        </AreaChart>
-      </ResponsiveContainer>
+    <div className="overflow-hidden rounded-xl border border-line bg-panel-2 p-2 sm:p-3">
+      <div className="mb-2 flex items-center justify-between px-1 text-[10px] text-muted">
+        <span>{candles.length} verified H1 candles</span>
+        <span>Newest: {dateTime(data.last_update)}</span>
+      </div>
+      <svg viewBox={`0 0 ${points.width} ${points.height}`} className="h-64 w-full sm:h-80" role="img" aria-label={`${data.instrument} H1 candlestick chart`}>
+        <line x1="12" y1="12" x2="982" y2="12" stroke="currentColor" className="text-line" />
+        <line x1="12" y1="180" x2="982" y2="180" stroke="currentColor" className="text-line" />
+        <line x1="12" y1="332" x2="982" y2="332" stroke="currentColor" className="text-line" />
+        {points.items.map((c) => (
+          <g key={c.timestamp}>
+            <line
+              x1={c.x}
+              x2={c.x}
+              y1={c.highY}
+              y2={c.lowY}
+              stroke="currentColor"
+              className={c.up ? 'text-up' : 'text-down'}
+              strokeWidth="1.5"
+            />
+            <rect
+              x={c.x - c.bodyW / 2}
+              y={c.bodyTop}
+              width={c.bodyW}
+              height={c.bodyHeight}
+              rx="1"
+              fill="currentColor"
+              className={c.up ? 'text-up' : 'text-down'}
+            />
+          </g>
+        ))}
+      </svg>
+      <div className="mt-1 flex items-center justify-between px-1 text-[10px] text-faint">
+        <span>{shortTime(candles[0].timestamp)}</span>
+        <span>{shortTime(candles[Math.floor(candles.length / 2)].timestamp)}</span>
+        <span>{shortTime(candles[candles.length - 1].timestamp)}</span>
+      </div>
     </div>
   );
 }
 
 export default function Markets() {
   const [instrument, setInstrument] = useInstrumentParam('markets');
-  const { data, error, loading, reload } = useApi<Market>(`/markets/${enc(instrument)}?timeframe=h1`);
-  const candles = data?.recent_candles ?? [];
+  const { data, error, loading, reload } = useApi<LiveMarket>(
+    `/live/market?instrument=${enc(instrument)}&timeframe=h1&limit=120`,
+  );
+  const [lastRefresh, setLastRefresh] = useState<Date | null>(null);
+  const candles = data?.candles ?? [];
   const first = candles[0]?.close;
-  const last = candles[candles.length - 1]?.close;
-  const change = first && last ? last - first : null;
+  const last = data?.current_price ?? candles[candles.length - 1]?.close;
+  const change = first != null && last != null ? last - first : null;
   const changePct = first && change != null ? change / first : null;
   const isMock = data?.provider === 'mock';
 
+  // Twelve Data's price endpoint is polled conservatively. Candle history is
+  // process-cached by the backend, so this keeps the quote fresh without
+  // repeatedly downloading the same H1 history.
+  useEffect(() => {
+    const timer = window.setInterval(async () => {
+      await reload();
+      setLastRefresh(new Date());
+    }, 10_000);
+    return () => window.clearInterval(timer);
+  }, [reload]);
+
+  useEffect(() => {
+    if (data) setLastRefresh(new Date());
+  }, [data]);
+
   return (
     <div>
-      <PageHeader title="Markets" action={<RefreshButton onClick={reload} loading={loading} />}>
-        Latest price and the last hourly candles from the backend's market data provider.
+      <PageHeader
+        title="Markets"
+        action={<RefreshButton onClick={async () => { await reload(); setLastRefresh(new Date()); }} loading={loading} />}
+      >
+        Live prices and verified H1 candles from the backend market-data provider.
       </PageHeader>
       <Segmented options={INSTRUMENTS} value={instrument} onChange={setInstrument} />
 
       <div className="mt-4">
         {loading && !data ? (
-          <Card>
-            <LoadingBlock rows={6} />
-          </Card>
+          <Card><LoadingBlock rows={6} /></Card>
         ) : error && !data ? (
           <ErrorBlock error={error} onRetry={reload} />
         ) : data ? (
           <div className="min-w-0 space-y-4">
             {isMock && (
               <Notice>
-                The backend is using its <span className="font-medium">mock</span> market data provider, so these prices are placeholders. Set
-                MARKET_DATA_PROVIDER=twelvedata on Render to show real prices.
+                The backend is using its <span className="font-medium">mock</span> market data provider, so these prices are placeholders.
               </Notice>
             )}
+
             <section className="rounded-2xl border border-line bg-panel p-4 sm:p-5">
               <div className="flex flex-wrap items-end justify-between gap-4">
                 <div>
-                  <div className="text-[11px] font-medium uppercase tracking-wider text-faint">{data.instrument_metadata.display_name} · H1</div>
-                  <div className="num mt-1 text-3xl font-semibold sm:text-4xl">{price(data.current_price, instrument)}</div>
+                  <div className="flex items-center gap-2 text-[11px] font-medium uppercase tracking-wider text-faint">
+                    <span className="inline-block h-2 w-2 rounded-full bg-up" />
+                    {data.instrument} · H1 · LIVE
+                  </div>
+                  <div className="num mt-1 text-3xl font-semibold sm:text-4xl">
+                    {price(data.current_price, instrument)}
+                  </div>
                   {change != null && (
                     <div className={`num mt-1 text-sm ${change >= 0 ? 'text-up' : 'text-down'}`}>
-                      {change >= 0 ? '+' : '−'}
-                      {price(Math.abs(change), instrument)} ({changePct! >= 0 ? '+' : '−'}
-                      {Math.abs(changePct! * 100).toFixed(2)}%) <span className="text-faint">over {candles.length} hours</span>
+                      {change >= 0 ? '+' : '−'}{price(Math.abs(change), instrument)} ({changePct! >= 0 ? '+' : '−'}
+                      {Math.abs(changePct! * 100).toFixed(2)}%) <span className="text-faint">across displayed H1 history</span>
                     </div>
                   )}
+                  <div className="mt-1 text-[10px] text-muted">
+                    Quote polling: 10s · {lastRefresh ? `last UI refresh ${lastRefresh.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}` : 'connecting…'}
+                  </div>
                 </div>
                 <div className="flex flex-wrap gap-2">
                   <Pill status={isMock ? 'mock' : 'available'}>{humanize(data.provider)}</Pill>
-                  <Pill status={data.data_quality.is_clean ? 'available' : 'unavailable'}>{data.data_quality.is_clean ? 'Clean data' : 'Data issues'}</Pill>
+                  <Pill status={data.data_quality.is_clean ? 'available' : 'unavailable'}>
+                    {data.data_quality.is_clean ? 'Verified live data' : 'Data issues'}
+                  </Pill>
                 </div>
               </div>
+
               <div className="mt-4">
-                {candles.length > 1 ? (
-                  <PriceChart m={data} />
-                ) : (
-                  <Empty title="No recent candles">The provider returned no candle history for this instrument.</Empty>
-                )}
+                {candles.length > 1 ? <CandleChart data={data} /> : <Empty title="No recent candles">The provider returned no completed candle history.</Empty>}
               </div>
             </section>
 
             <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-              <Card title="Recent candles" subtitle="Newest first" pad={false} className="lg:col-span-2">
+              <Card title="Recent candles" subtitle="Newest verified H1 candles first" pad={false} className="lg:col-span-2">
                 {candles.length === 0 ? (
-                  <div className="p-4">
-                    <Empty title="Nothing to show" />
-                  </div>
+                  <div className="p-4"><Empty title="Nothing to show" /></div>
                 ) : (
                   <div className="overflow-x-auto">
                     <table className="w-full text-[11px] sm:text-xs">
@@ -150,12 +210,14 @@ export default function Markets() {
                   </div>
                 )}
               </Card>
-              <Card title="Data quality" subtitle="Checks run by the backend on these candles">
+
+              <Card title="Data quality" subtitle="Backend validation on every live batch">
                 <KV k="OHLC violations" v={<span className="num">{data.data_quality.ohlc_violations}</span>} />
                 <KV k="Duplicate timestamps" v={<span className="num">{data.data_quality.duplicate_timestamps}</span>} />
                 <KV k="Unexpected gaps" v={<span className="num">{data.data_quality.unexpected_gaps}</span>} />
-                <KV k="Pip size" v={<span className="num">{data.instrument_metadata.pip_size}</span>} />
-                <KV k="Asset class" v={humanize(data.instrument_metadata.asset_class)} />
+                <KV k="Last completed candle" v={data.last_update ? dateTime(data.last_update) : '—'} />
+                <KV k="Pip size" v={<span className="num">{data.instrument_metadata?.pip_size ?? '—'}</span>} />
+                <KV k="Asset class" v={humanize(data.instrument_metadata?.asset_class)} />
                 <div className="mt-3 grid grid-cols-2 gap-3 border-t border-line pt-3">
                   <Stat label="High" value={candles.length ? price(Math.max(...candles.map((c) => c.high)), instrument) : '—'} />
                   <Stat label="Low" value={candles.length ? price(Math.min(...candles.map((c) => c.low)), instrument) : '—'} />
