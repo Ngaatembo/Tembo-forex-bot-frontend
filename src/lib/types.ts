@@ -381,12 +381,12 @@ export interface LiveDecision {
   trade_plan: {
     decision: string;
     direction: string;
-    confidence: number;
+    confidence?: number | null;
     entry: number | null;
     stop_loss: number | null;
     take_profit: number | null;
     risk_reward: number | null;
-    factors: Array<{
+    factors?: Array<{
       name: string;
       score: number;
       direction: string;
