@@ -48,8 +48,9 @@ function TradePlan({ plan }: { plan: LiveOverview['trade_plan'] }) {
 
 function MarketChart({ data }: { data: LiveMarket | null }) {
   const points = useMemo(() => {
-    if (!data?.candles.length) return '';
-    const closes = data.candles.map((c) => c.close);
+    const candles = Array.isArray(data?.candles) ? data.candles : [];
+    if (!candles.length) return '';
+    const closes = candles.map((c) => c.close);
     const min = Math.min(...closes);
     const max = Math.max(...closes);
     const span = max - min || 1;
@@ -62,7 +63,8 @@ function MarketChart({ data }: { data: LiveMarket | null }) {
       .join(' ');
   }, [data]);
 
-  if (!data || data.status === 'mock' || !data.candles.length) {
+  const candles = Array.isArray(data?.candles) ? data.candles : [];
+  if (!data || data.status === 'mock' || !candles.length) {
     return (
       <div className="grid min-h-64 place-items-center rounded-xl border border-dashed border-line-2 bg-panel-2 px-5 text-center">
         <div>
@@ -79,7 +81,7 @@ function MarketChart({ data }: { data: LiveMarket | null }) {
   return (
     <div className="overflow-hidden rounded-xl border border-line bg-panel-2 p-3">
       <div className="mb-2 flex items-center justify-between text-[11px] text-muted">
-        <span>{data.candles.length} validated candles · {humanize(data.timeframe)}</span>
+        <span>{candles.length} validated candles · {humanize(data.timeframe)}</span>
         <span>{data.last_update ? dateTime(data.last_update) : '—'}</span>
       </div>
       <svg viewBox="0 0 1000 240" className="h-64 w-full" role="img" aria-label={`${data.instrument} price chart`}>
@@ -207,11 +209,11 @@ function DecisionWorkspace({ instrument, timeframe }: { instrument: string; time
                 ))}
               </div>
 
-              {plan.rejection_reasons.length > 0 && (
+              {(plan.rejection_reasons ?? []).length > 0 && (
                 <div className="mt-4 rounded-xl border border-warn/25 bg-warn-soft/40 p-3 text-xs leading-relaxed">
                   <div className="font-medium">Decision restrictions</div>
                   <ul className="mt-1 list-disc space-y-1 pl-4 text-muted">
-                    {plan.rejection_reasons.map((reason) => <li key={reason}>{reason}</li>)}
+                    {(plan.rejection_reasons ?? []).map((reason) => <li key={reason}>{reason}</li>)}
                   </ul>
                 </div>
               )}
@@ -246,8 +248,8 @@ function MarketWorkspace({ instrument, timeframe }: { instrument: string; timefr
           <div className="mb-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
             <Stat label="Quote" value={market.data?.current_price != null ? price(market.data.current_price, instrument) : '—'} />
             <Stat label="Feed" value={humanize(market.data?.status)} />
-            <Stat label="Candles" value={market.data?.candles.length.toString() ?? '0'} />
-            <Stat label="Quality" value={market.data?.data_quality.is_clean ? 'Verified' : 'Waiting'} />
+            <Stat label="Candles" value={(Array.isArray(market.data?.candles) ? market.data.candles.length : 0).toString()} />
+            <Stat label="Quality" value={market.data?.data_quality?.is_clean ? 'Verified' : 'Waiting'} />
           </div>
           <MarketChart data={market.data} />
           <div className="mt-3 flex items-start gap-2 rounded-xl border border-line bg-panel-2 p-3 text-xs leading-relaxed text-muted">
