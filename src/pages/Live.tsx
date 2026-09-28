@@ -475,39 +475,6 @@ function NewsImpact({ decision }: { decision: LiveDecisionView | null }) {
   );
 }
 
-function RiskMonitor({ decision }: { decision: LiveDecisionView | null }) {
-  const gates = [
-    ['Research / strategy gate', decision?.strategy_gate?.status, decision?.strategy_gate?.reason],
-    ['Macro-risk gate', decision?.macro_risk?.level, decision?.macro_risk?.reason],
-    ['Risk engine', decision?.risk?.state ?? decision?.risk?.status, decision?.risk?.reason],
-    ['Paper eligibility', decision?.paper_eligibility?.status, decision?.paper_eligibility?.reason],
-    ['Execution', decision?.execution?.enabled ? 'ENABLED' : 'DISABLED', decision?.execution?.note],
-  ];
-  return (
-    <TerminalPanel title="Risk monitor" eyebrow="Server-side safety state" right={<ShieldCheck className="h-4 w-4 text-up" />}>
-      <div className="space-y-1">
-        {gates.map(([name, state, reason]) => {
-          const tone = name === 'Execution' ? 'good' : toneFor(state);
-          const finalTone = name === 'Execution' && String(state) === 'ENABLED' ? 'warn' : tone;
-          return (
-            <div key={String(name)} className="flex items-center gap-2 border-b border-line py-2 last:border-b-0">
-              <ToneDot tone={finalTone} />
-              <div className="min-w-0 flex-1">
-                <div className="text-[9px] font-medium text-fg">{String(name)}</div>
-                <div className="truncate text-[8px] text-faint">{safeText(reason)}</div>
-              </div>
-              <span className="text-[8px] font-bold uppercase tracking-[0.08em] text-muted">{humanize(safeText(state))}</span>
-            </div>
-          );
-        })}
-      </div>
-      <div className="mt-3 border-t border-line pt-3 text-[8px] leading-relaxed text-faint">
-        The browser only displays the risk hierarchy. Individual kill-switch, stop-validation, position-limit, drawdown and exposure checks remain authoritative on the backend and are never duplicated or bypassed here.
-      </div>
-    </TerminalPanel>
-  );
-}
-
 function TradePlan({ decision, instrument }: { decision: LiveDecisionView | null; instrument: string }) {
   const plan = decision?.trade_plan;
   if (!plan || safeText(plan.decision, 'NO_TRADE') === 'NO_TRADE') {
