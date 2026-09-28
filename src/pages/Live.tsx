@@ -285,11 +285,9 @@ function AccountRail({ account, risk }: { account: AccountOverview | null; risk:
 
 function Guidance({
   decision,
-  market,
   instrument,
 }: {
   decision: LiveDecisionView | null;
-  market: LiveMarket | null;
   instrument: string;
 }) {
   const plan = decision?.trade_plan;
