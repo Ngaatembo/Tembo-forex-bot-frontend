@@ -756,3 +756,4 @@ export default function Live({ go: _go }: { go?: (r: string) => void }) {
       )}
     </div>
   );
+}
