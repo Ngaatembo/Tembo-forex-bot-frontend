@@ -102,7 +102,7 @@ function TerminalPanel({
 }: {
   title: string;
   eyebrow?: string;
-  right?: React.ReactNode;
+  right?: ReactNode;
   children: ReactNode;
   className?: string;
 }) {
