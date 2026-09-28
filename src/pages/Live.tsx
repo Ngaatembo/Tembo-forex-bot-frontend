@@ -346,6 +346,8 @@ function Guidance({
 
 function AnalysisGrid({ analysis }: { analysis: LiveAnalysis | null }) {
   const item = analysis?.analysis;
+  const momentum = item?.momentum;
+  const volatility = item?.volatility;
   const cards = [
     ['Trend', safeText(item?.trend?.state, 'Not available')],
     ['Momentum', safeText(item?.momentum?.state, 'Not available')],
@@ -367,15 +369,15 @@ function AnalysisGrid({ analysis }: { analysis: LiveAnalysis | null }) {
           <div className="mt-2 grid gap-2 md:grid-cols-3">
             <div className="border border-line bg-panel-2 p-3 text-[10px]">
               <div className="text-faint">RSI 14</div>
-              <div className="num mt-1 text-fg">{finite(item.momentum?.rsi_14) ? Number(item.momentum!.rsi_14).toFixed(1) : '—'}</div>
+              <div className="num mt-1 text-fg">{finite(momentum?.rsi_14) ? Number(momentum.rsi_14).toFixed(1) : '—'}</div>
             </div>
             <div className="border border-line bg-panel-2 p-3 text-[10px]">
               <div className="text-faint">ATR 14</div>
-              <div className="num mt-1 text-fg">{finite(item.volatility?.atr_14) ? Number(item.volatility!.atr_14).toFixed(4) : '—'}</div>
+              <div className="num mt-1 text-fg">{finite(volatility?.atr_14) ? Number(volatility.atr_14).toFixed(4) : '—'}</div>
             </div>
             <div className="border border-line bg-panel-2 p-3 text-[10px]">
               <div className="text-faint">ATR %</div>
-              <div className="num mt-1 text-fg">{finite(item.volatility?.atr_percent) ? Number(item.volatility!.atr_percent).toFixed(2) + '%' : '—'}</div>
+              <div className="num mt-1 text-fg">{finite(volatility?.atr_percent) ? Number(volatility.atr_percent).toFixed(2) + '%' : '—'}</div>
             </div>
           </div>
         </>
@@ -710,7 +712,7 @@ export default function Live({ go: _go }: { go?: (r: string) => void }) {
             </div>
           </div>
 
-          <Guidance decision={decision.data} market={market.data} instrument={instrument} />
+          <Guidance decision={decision.data} instrument={instrument} />
 
           <div className="grid gap-3 lg:grid-cols-[1.25fr_.75fr]">
             <AnalysisGrid analysis={analysis.data} />
