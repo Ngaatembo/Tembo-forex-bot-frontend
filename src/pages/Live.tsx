@@ -306,38 +306,109 @@ export default function Live({ go: _go }: { go?: (r: string) => void }) {
 
       {data.loading && !data.data ? <LoadingBlock rows={6} /> : data.error && !data.data ? <ErrorBlock error={data.error} onRetry={data.reload} /> : data.data ? (
         <>
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            <Card title="Selected market" subtitle={instrument} className="border-gold/15 bg-gradient-to-br from-panel to-panel-2">
-              <div className="flex items-end justify-between gap-3">
-                <div className="num text-2xl font-semibold">{selected?.current_price != null ? price(selected.current_price, instrument) : '—'}</div>
-                <Pill tone={toneFor(selected?.data_status)}>{humanize(selected?.data_status)}</Pill>
+          <section className="overflow-hidden rounded-3xl border border-gold/20 bg-gradient-to-br from-panel via-panel to-panel-2 shadow-lg">
+            <div className="border-b border-line px-4 py-4 sm:px-6">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="h-2 w-2 rounded-full bg-up" />
+                    <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted">Live market</span>
+                    <span className="text-[11px] text-faint">/</span>
+                    <span className="text-[11px] font-semibold text-gold">{instrument}</span>
+                  </div>
+                  <div className="mt-1 text-xs text-muted">Verified provider data · {timeframe} decision frame</div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Pill tone={toneFor(selected?.data_status)}>{humanize(selected?.data_status)}</Pill>
+                  <Pill tone={data.data.execution.enabled ? 'warn' : 'good'}>
+                    {data.data.execution.enabled ? 'EXECUTION ON' : 'PAPER ONLY'}
+                  </Pill>
+                </div>
               </div>
-              <div className="mt-3 text-xs text-muted">{selected?.last_update ? dateTime(selected.last_update) : 'No market timestamp yet'}</div>
-            </Card>
-            <Card title="Engine decision" subtitle="Selector + risk gates">
-              <div className="flex items-center gap-2"><Crosshair className="h-5 w-5 text-gold" /><span className="text-lg font-semibold">{humanize(selected?.decision)}</span></div>
-              <p className="mt-2 text-xs leading-relaxed text-muted">{selected?.reason ?? 'Waiting for market evidence.'}</p>
-            </Card>
-            <Card title="MT5 bridge" subtitle="Execution connection">
-              <div className="flex items-center gap-2"><Zap className="h-5 w-5 text-warn" /><Pill tone={toneFor(data.data.mt5.status)}>{humanize(data.data.mt5.status)}</Pill></div>
-              <p className="mt-2 text-xs text-muted">{data.data.mt5.message}</p>
-            </Card>
-            <Card title="Safety state" subtitle="Hard execution guard">
-              <div className="flex items-center gap-2"><ShieldCheck className="h-5 w-5 text-up" /><span className="font-medium">{data.data.execution.enabled ? 'Execution enabled' : 'Execution disabled'}</span></div>
-              <p className="mt-2 text-xs text-muted">{data.data.execution.note}</p>
-            </Card>
-          </div>
+            </div>
+
+            <div className="grid lg:grid-cols-[1.45fr_.8fr]">
+              <div className="border-b border-line p-5 sm:p-7 lg:border-b-0 lg:border-r">
+                <div className="text-[11px] font-medium uppercase tracking-widest text-muted">Current price</div>
+                <div className="mt-2 flex flex-wrap items-end gap-x-4 gap-y-2">
+                  <div className="num text-4xl font-semibold tracking-tight text-fg sm:text-5xl">
+                    {selected?.current_price != null ? price(selected.current_price, instrument) : '—'}
+                  </div>
+                  <div className="mb-1 text-xs text-muted">
+                    {selected?.last_update ? 'Updated ' + dateTime(selected.last_update) : 'Waiting for timestamp'}
+                  </div>
+                </div>
+                <div className="mt-6 grid grid-cols-3 gap-2 sm:gap-3">
+                  <div className="rounded-2xl border border-line bg-panel/70 p-3">
+                    <div className="text-[10px] uppercase tracking-wider text-muted">Feed</div>
+                    <div className="mt-1 text-sm font-semibold">{humanize(selected?.data_status)}</div>
+                  </div>
+                  <div className="rounded-2xl border border-line bg-panel/70 p-3">
+                    <div className="text-[10px] uppercase tracking-wider text-muted">Provider</div>
+                    <div className="mt-1 truncate text-sm font-semibold">{humanize(selected?.provider)}</div>
+                  </div>
+                  <div className="rounded-2xl border border-line bg-panel/70 p-3">
+                    <div className="text-[10px] uppercase tracking-wider text-muted">Frame</div>
+                    <div className="mt-1 text-sm font-semibold">{timeframe}</div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-5 sm:p-6">
+                <div className="flex items-center justify-between">
+                  <div className="text-[11px] font-semibold uppercase tracking-widest text-muted">Engine decision</div>
+                  <Crosshair className="h-4 w-4 text-gold" />
+                </div>
+                <div className="mt-3 flex items-center gap-3">
+                  <div className="grid h-11 w-11 place-items-center rounded-2xl border border-gold/25 bg-gold-soft">
+                    <Crosshair className="h-5 w-5 text-gold" />
+                  </div>
+                  <div className="min-w-0">
+                    <div className="text-xl font-semibold">{humanize(selected?.decision)}</div>
+                    <div className="mt-0.5 text-[11px] text-muted">Deterministic selector</div>
+                  </div>
+                </div>
+                <p className="mt-4 text-xs leading-relaxed text-muted">{selected?.reason ?? 'Waiting for market evidence.'}</p>
+                <div className="mt-5 flex items-start gap-2 rounded-2xl border border-line bg-panel/70 p-3">
+                  <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-up" />
+                  <div>
+                    <div className="text-xs font-semibold">{data.data.execution.enabled ? 'Execution guard requires review' : 'Execution locked'}</div>
+                    <div className="mt-1 text-[11px] leading-relaxed text-muted">{data.data.execution.note}</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="grid border-t border-line sm:grid-cols-2">
+              <div className="flex items-center gap-3 border-b border-line px-4 py-3 sm:border-b-0 sm:border-r sm:px-6">
+                <Zap className="h-4 w-4 text-warn" />
+                <div className="min-w-0">
+                  <div className="text-[10px] uppercase tracking-wider text-muted">MT5 bridge</div>
+                  <div className="text-xs font-semibold">{humanize(data.data.mt5.status)}</div>
+                </div>
+                <Pill tone={toneFor(data.data.mt5.status)}>{humanize(data.data.mt5.status)}</Pill>
+              </div>
+              <div className="flex items-center gap-3 px-4 py-3 sm:px-6">
+                <ShieldCheck className="h-4 w-4 text-up" />
+                <div className="min-w-0">
+                  <div className="text-[10px] uppercase tracking-wider text-muted">Safety mode</div>
+                  <div className="text-xs font-semibold">{data.data.execution.enabled ? 'Execution enabled' : 'Paper only'}</div>
+                </div>
+                <span className="ml-auto text-[10px] font-medium uppercase tracking-wider text-muted">Hard guard</span>
+              </div>
+            </div>
+          </section>
 
           <div className="mt-3">
             <MarketWorkspace instrument={instrument} timeframe={timeframe} />
           </div>
 
           <div className="mt-3">
-            <AnalysisWorkspace instrument={instrument} timeframe={timeframe} />
+            <DecisionWorkspace instrument={instrument} timeframe={timeframe} />
           </div>
 
           <div className="mt-3">
-            <DecisionWorkspace instrument={instrument} timeframe={timeframe} />
+            <AnalysisWorkspace instrument={instrument} timeframe={timeframe} />
           </div>
 
           <div className="mt-3"><RuntimeTelemetry instrument={instrument} /></div>
