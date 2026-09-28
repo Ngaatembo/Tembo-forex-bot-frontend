@@ -181,7 +181,7 @@ function DecisionWorkspace({ instrument, timeframe }: { instrument: string; time
         <>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
             <Stat label="Decision" value={humanize(decision.data?.decision)} />
-            <Stat label="Confidence" value={plan ? `${plan.confidence.toFixed(0)} / 100` : '—'} />
+            <Stat label="Confidence" value={plan?.confidence != null ? `${plan.confidence.toFixed(0)} / 100` : '—'} />
             <Stat label="Risk / reward" value={plan?.risk_reward != null ? `1:${plan.risk_reward.toFixed(1)}` : '—'} />
             <Stat label="Macro risk" value={humanize(decision.data?.macro_risk?.level)} />
           </div>
@@ -196,11 +196,11 @@ function DecisionWorkspace({ instrument, timeframe }: { instrument: string; time
               </div>
 
               <div className="mt-4 grid gap-2 sm:grid-cols-2">
-                {plan.factors.map((factor) => (
+                {(plan.factors ?? []).map((factor) => (
                   <div key={factor.name} className="rounded-xl border border-line bg-panel-2 p-3">
                     <div className="flex items-center justify-between text-xs">
                       <span className="font-medium">{humanize(factor.name)}</span>
-                      <span className="num">{factor.score.toFixed(0)} /  {factor.direction}</span>
+                      <span className="num">{factor.score != null ? factor.score.toFixed(0) : '—'} / {factor.direction ?? '—'}</span>
                     </div>
                     <p className="mt-1 text-[11px] leading-relaxed text-muted">{factor.reason}</p>
                   </div>
