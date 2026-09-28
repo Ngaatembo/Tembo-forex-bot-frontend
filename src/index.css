@@ -4,25 +4,32 @@
   --font-sans: 'Inter Tight', ui-sans-serif, system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
 
-  --color-ink: #0a0d12;
-  --color-panel: #11161e;
-  --color-panel-2: #161c26;
-  --color-line: #222a36;
-  --color-line-2: #2c3544;
-  --color-fg: #e8ecf2;
-  --color-muted: #8b95a5;
-  --color-faint: #5d6776;
+  /* Deep-navy trading terminal palette (matches the Tembo design reference). */
+  --color-ink: #060b14;
+  --color-panel: #0b1320;
+  --color-panel-2: #0f1929;
+  --color-panel-3: #13203a;
+  --color-line: #182438;
+  --color-line-2: #22324b;
+  --color-fg: #e7eef8;
+  --color-muted: #8b9bb4;
+  --color-faint: #56667f;
+
+  /* Brand accent: Tembo green. */
+  --color-brand: #22d37a;
+  --color-brand-soft: #0c2b1f;
 
   --color-gold: #e5b64a;
-  --color-gold-soft: #3a2f16;
-  --color-up: #3ecf8e;
-  --color-up-soft: #10301f;
-  --color-down: #f06a6a;
-  --color-down-soft: #3a1618;
-  --color-info: #6aa8f0;
-  --color-info-soft: #13243a;
-  --color-warn: #f0b85a;
-  --color-warn-soft: #362812;
+  --color-gold-soft: #33290f;
+  --color-up: #22c77a;
+  --color-up-soft: #0b2a1d;
+  --color-down: #f0585d;
+  --color-down-soft: #34141a;
+  --color-info: #4b8df0;
+  --color-info-soft: #0f2140;
+  --color-warn: #f2b447;
+  --color-warn-soft: #33260f;
+  --color-violet: #a47cf5;
 }
 
 html,
@@ -61,7 +68,7 @@ body {
   }
 }
 .skeleton {
-  background: linear-gradient(90deg, var(--color-panel-2) 0, #1d2531 40px, var(--color-panel-2) 80px);
+  background: linear-gradient(90deg, var(--color-panel-2) 0, #16233a 40px, var(--color-panel-2) 80px);
   background-size: 200px 100%;
   animation: shimmer 1.4s infinite linear;
   border-radius: 6px;
@@ -78,4 +85,41 @@ body {
 }
 .pulse-dot {
   animation: pulse-dot 1.6s ease-in-out infinite;
+}
+
+/* Subtle glow used on the primary signal button. */
+.glow-up {
+  box-shadow: 0 0 0 1px rgb(34 199 122 / 0.55), 0 0 28px -6px rgb(34 199 122 / 0.55);
+}
+.glow-down {
+  box-shadow: 0 0 0 1px rgb(240 88 93 / 0.55), 0 0 28px -6px rgb(240 88 93 / 0.55);
+}
+.glow-wait {
+  box-shadow: 0 0 0 1px rgb(242 180 71 / 0.45), 0 0 24px -8px rgb(242 180 71 / 0.45);
+}
+
+/* Dashboard layout. Phone: decision first, then chart. Desktop: chart beside the rail, guidance below. */
+.cockpit-grid {
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-areas: 'quote' 'guide' 'chart' 'insights' 'plan' 'rail' 'evidence';
+}
+@media (min-width: 1024px) {
+  .cockpit-grid {
+    grid-template-columns: minmax(0, 1fr) 300px;
+    grid-template-areas:
+      'quote rail'
+      'chart rail'
+      'guide guide'
+      'insights insights'
+      'plan plan'
+      'evidence evidence';
+    grid-template-rows: auto 1fr;
+  }
+}
+@media (min-width: 1440px) {
+  .cockpit-grid {
+    grid-template-columns: minmax(0, 1fr) 330px;
+  }
 }

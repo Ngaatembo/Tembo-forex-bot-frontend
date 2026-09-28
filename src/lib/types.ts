@@ -361,7 +361,60 @@ export interface LiveDecision {
     status: string;
     selected_config_id?: string | null;
     reason: string;
+    live_evaluation?: {
+      config_id: string;
+      strategy_family: string;
+      status: string;
+      direction: string;
+      triggered: boolean;
+      entry: number | null;
+      stop_loss: number | null;
+      take_profit: number | null;
+      risk_reward: number | null;
+      reason: string;
+      parameters?: Record<string, unknown> | string | null;
+    } | null;
   };
+  technical_decision?: {
+    decision: string;
+    direction: string;
+    confidence: number | null;
+    entry: number | null;
+    stop_loss: number | null;
+    take_profit: number | null;
+    risk_reward: number | null;
+    factors: Array<{ name: string; score: number; direction: string; reason: string }>;
+    rejection_reasons: string[];
+    methodology: string;
+  };
+  market_evidence?: {
+    last_close: number | null;
+    regime: string | null;
+    rsi_14: number | null;
+    atr_14: number | null;
+    atr_percent: number | null;
+  };
+  news?: {
+    status?: string;
+    freshness?: string;
+    provider?: string;
+    last_successful_fetch?: string | null;
+    error?: string | null;
+    headlines?: Array<{ news_id?: string; timestamp?: string; headline?: string; source?: string; url?: string | null }>;
+  };
+  macro_events?: Array<{
+    event_id?: string;
+    timestamp?: string;
+    currency?: string;
+    country?: string | null;
+    event_name?: string;
+    importance?: string;
+    previous?: string | number | null;
+    forecast?: string | number | null;
+    actual?: string | number | null;
+    source?: string | null;
+    time_confirmed?: boolean;
+  }>;
   risk?: {
     status: string;
     state?: string | null;
@@ -392,8 +445,9 @@ export interface LiveDecision {
       direction: string;
       reason: string;
     }>;
-    rejection_reasons: string[];
-    methodology: string;
+    rejection_reasons?: string[];
+    methodology?: string;
+    reason?: string;
   } | null;
   execution?: {
     enabled: boolean;
@@ -487,4 +541,113 @@ export interface RuntimeMetrics {
   execution_enabled: boolean;
   broker_contacted: boolean;
   note: string;
+}
+
+export interface RuntimePosition {
+  position_id: string;
+  instrument: string;
+  timeframe: string;
+  direction: string;
+  entry_price: number;
+  stop_price: number;
+  take_profit_price: number | null;
+  position_size: number;
+  candidate_config_id: string;
+  entry_time: string;
+  periods_held: number;
+  last_completed_candle_at: string | null;
+  status: string;
+}
+
+export interface RuntimeTrade {
+  trade_id: string;
+  position_id: string;
+  instrument: string;
+  timeframe: string;
+  direction: string;
+  entry_price: number;
+  exit_price: number;
+  position_size: number;
+  entry_time: string;
+  exit_time: string;
+  exit_reason: string;
+  realized_pnl: number;
+  candidate_config_id: string;
+}
+
+export interface SyntheticSymbol {
+  symbol: string;
+  underlying_symbol: string;
+  display_name: string;
+  market: string;
+  submarket: string;
+  subgroup: string;
+  pip_size: number;
+  exchange_is_open: boolean;
+}
+
+export interface SyntheticSymbols {
+  provider: string;
+  status: string;
+  symbols: SyntheticSymbol[];
+  message: string;
+}
+
+export interface DerivStatus {
+  connected?: boolean;
+  configured?: boolean;
+  mode?: string;
+  account_id?: string | null;
+  account_type?: string | null;
+  status?: string | null;
+  currency?: string | null;
+  balance?: number | null;
+  open_positions?: number;
+  positions?: Array<Record<string, unknown>>;
+  message?: string;
+}
+
+export interface DerivProposal {
+  status: string;
+  instrument: string;
+  underlying_symbol: string;
+  direction: string;
+  contract_type: string;
+  stake: number;
+  multiplier: number;
+  proposal_id: string;
+  ask_price: number;
+  spot: number | null;
+  payout: number | null;
+  currency: string;
+  protection: { attached: boolean; limit_order: Record<string, unknown>; source: string };
+  execution_token: string;
+}
+
+export interface DerivBuy {
+  status: string;
+  contract_id: number;
+  transaction_id?: number | string | null;
+  buy_price: number;
+  balance_after: number | null;
+}
+
+export interface DerivContract {
+  status: string;
+  contract: Record<string, unknown> & {
+    contract_id?: number;
+    status?: string;
+    is_sold?: number | boolean;
+    profit?: number;
+    profit_percentage?: number;
+    current_spot?: number;
+    entry_spot?: number;
+    buy_price?: number;
+    bid_price?: number;
+    currency?: string;
+    underlying?: string;
+    display_name?: string;
+    contract_type?: string;
+    limit_order?: Record<string, { order_amount?: number | null; value?: number | string | null } | undefined>;
+  };
 }

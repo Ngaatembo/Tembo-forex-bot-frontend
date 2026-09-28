@@ -106,7 +106,49 @@ export async function apiGet<T>(path: string, { fresh = false } = {}): Promise<T
   }
 }
 
-export function useApi<T>(path: string | null) {
+/**
+ * POST to the backend. Only used for the Deriv *demo* endpoints, which the
+ * backend itself re-validates against Tembo's current decision. Never retried
+ * automatically: a demo order must not be sent twice by accident.
+ */
+export async function apiPost<T>(path: string, body: unknown): Promise<T> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
+  try {
+    const res = await fetch(`${API_BASE_URL}${path}`, {
+      method: 'POST',
+      headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+      signal: controller.signal,
+    });
+    if (!res.ok) {
+      let detail = `${res.status} ${res.statusText}`;
+      try {
+        const b = await res.json();
+        if (b && typeof b.detail === 'string') detail = b.detail;
+      } catch {
+        /* non-JSON error body */
+      }
+      throw new ApiError(detail, res.status, 'http');
+    }
+    return (await res.json()) as T;
+  } catch (e) {
+    if (e instanceof ApiError) throw e;
+    if ((e as Error).name === 'AbortError') throw new ApiError('The server took too long to respond.', null, 'timeout');
+    throw new ApiError('Could not reach the Tembo backend.', null, 'network');
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+/**
+ * Fetch a backend path. `refreshMs` re-fetches in the background while the
+ * tab is visible, keeping the previous data on screen until new data lands.
+ * When `path` changes (e.g. another instrument), stale data from the old path
+ * is cleared immediately so one market's numbers never sit under another's name.
+ */
+export function useApi<T>(path: string | null, opts: { refreshMs?: number } = {}) {
+  const { refreshMs } = opts;
   const [data, setData] = useState<T | null>(() => {
     if (!path) return null;
     const hit = cache.get(path);
@@ -114,17 +156,23 @@ export function useApi<T>(path: string | null) {
   });
   const [error, setError] = useState<ApiError | null>(null);
   const [loading, setLoading] = useState<boolean>(!!path);
+  const [updatedAt, setUpdatedAt] = useState<number | null>(null);
   const reqId = useRef(0);
+  const lastPath = useRef(path);
 
   const load = useCallback(
-    async (fresh: boolean) => {
+    async (fresh: boolean, silent = false) => {
       if (!path) return;
       const id = ++reqId.current;
-      setLoading(true);
-      setError(null);
+      if (!silent) setLoading(true);
+      if (!silent) setError(null);
       try {
         const d = await apiGet<T>(path, { fresh });
-        if (id === reqId.current) setData(d);
+        if (id === reqId.current) {
+          setData(d);
+          setError(null);
+          setUpdatedAt(Date.now());
+        }
       } catch (e) {
         if (id === reqId.current) setError(e as ApiError);
       } finally {
@@ -135,11 +183,70 @@ export function useApi<T>(path: string | null) {
   );
 
   useEffect(() => {
+    if (lastPath.current !== path) {
+      lastPath.current = path;
+      const hit = path ? cache.get(path) : undefined;
+      setData(hit ? (hit.data as T) : null);
+      setError(null);
+    }
+    if (!path) {
+      setLoading(false);
+      return;
+    }
+    load(false);
+  }, [load, path]);
+
+  useEffect(() => {
+    if (!path || !refreshMs) return;
+    const t = setInterval(() => {
+      if (document.visibilityState === 'visible') load(true, true);
+    }, refreshMs);
+    return () => clearInterval(t);
+  }, [load, path, refreshMs]);
+
+  const reload = useCallback(() => load(true), [load]);
+  return { data, error, loading, reload, updatedAt };
+}
+
+/** Same as useApi, for a list of paths whose length can change (e.g. a watchlist). */
+export function useApiMany<T>(paths: string[], opts: { refreshMs?: number } = {}) {
+  const { refreshMs } = opts;
+  const key = paths.join('|');
+  const [results, setResults] = useState<Record<string, { data: T | null; error: ApiError | null }>>({});
+  const [loading, setLoading] = useState(paths.length > 0);
+
+  const load = useCallback(
+    async (fresh: boolean) => {
+      const list = key ? key.split('|') : [];
+      setLoading(true);
+      await Promise.all(
+        list.map(async (p) => {
+          try {
+            const d = await apiGet<T>(p, { fresh });
+            setResults((r) => ({ ...r, [p]: { data: d, error: null } }));
+          } catch (e) {
+            setResults((r) => ({ ...r, [p]: { data: r[p]?.data ?? null, error: e as ApiError } }));
+          }
+        }),
+      );
+      setLoading(false);
+    },
+    [key],
+  );
+
+  useEffect(() => {
     load(false);
   }, [load]);
 
-  const reload = useCallback(() => load(true), [load]);
-  return { data, error, loading, reload };
+  useEffect(() => {
+    if (!refreshMs) return;
+    const t = setInterval(() => {
+      if (document.visibilityState === 'visible') load(true);
+    }, refreshMs);
+    return () => clearInterval(t);
+  }, [load, refreshMs]);
+
+  return { results, loading, reload: () => load(true) };
 }
 
 export const enc = (instrument: string) => instrument.split('/').map(encodeURIComponent).join('/');

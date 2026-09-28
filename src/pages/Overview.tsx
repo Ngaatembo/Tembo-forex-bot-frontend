@@ -1,6 +1,6 @@
 import { ArrowRight, CircleSlash, ShieldCheck } from 'lucide-react';
 import { enc, useApi } from '../lib/api';
-import type { AccountOverview, Calendar, Decision, Health } from '../lib/types';
+import type { Calendar, Decision, Health, RuntimeStatus } from '../lib/types';
 import { INSTRUMENTS, STATUS_TEXT, dateTime, humanize, money, relTime } from '../lib/format';
 import { Card, ErrorBlock, LoadingBlock, PageHeader, Pill, Skeleton, Stat } from '../components/ui';
 import snapshot from '../data/researchSnapshot.json';
@@ -92,11 +92,12 @@ function SystemCard() {
 }
 
 function AccountCard({ go }: { go: (r: string) => void }) {
-  const { data, error, loading, reload } = useApi<AccountOverview>('/account/overview');
+  const { data, error, loading, reload } = useApi<RuntimeStatus>('/runtime/status');
+  const equity = data ? data.initial_equity + (data.realized_pnl ?? 0) : null;
   return (
     <Card
       title="Paper account"
-      subtitle={data?.generated_at ? `Snapshot ${relTime(data.generated_at)}` : 'Simulated money only'}
+      subtitle={data?.last_cycle_at ? `Live paper runtime · last cycle ${relTime(data.last_cycle_at)}` : 'Simulated money only'}
       action={
         <button onClick={() => go('paper')} className="text-xs font-medium text-gold">
           Open
@@ -109,10 +110,10 @@ function AccountCard({ go }: { go: (r: string) => void }) {
         <ErrorBlock error={error} onRetry={reload} />
       ) : data ? (
         <div className="grid grid-cols-2 gap-4">
-          <Stat label="Equity" value={money(data.equity)} />
+          <Stat label="Equity" value={money(equity)} />
           <Stat label="Realized P&L" value={money(data.realized_pnl, { sign: true })} tone={data.realized_pnl < 0 ? 'down' : data.realized_pnl > 0 ? 'up' : undefined} />
-          <Stat label="Open positions" value={data.open_positions_count} />
-          <Stat label="Real money" value={money(data.real_money)} sub={humanize(data.mode)} />
+          <Stat label="Open positions" value={data.open_positions} />
+          <Stat label="Real money" value={money(0)} sub={humanize(data.status)} />
         </div>
       ) : null}
     </Card>

@@ -2,18 +2,27 @@
 
 Dashboard for the [Tembo Forex Bot backend](https://github.com/Ngaatembo/Tembo-forex-bot): decision engine, market prices, paper account, research evidence, and the macro calendar.
 
-**Paper trading only.** This app only reads from the backend (every backend route is GET-only). It holds no API keys and cannot place trades.
+**Paper and Deriv demo only.** The frontend holds no API keys and never talks to a broker. Almost every call is a read-only GET. The only POSTs are the Deriv *demo* controls on the Dashboard (quote → confirm → close), and the backend re-checks each one against Tembo's current decision, paper eligibility and demo-only mode before touching the demo account.
 
 ## Pages
 
 | Page | Backend endpoints |
 |---|---|
-| Overview | `/health`, `/decisions`, `/account/overview`, `/calendar` |
-| Decisions | `/decisions?instrument=…&timeframe=h1` |
-| Markets | `/markets/{instrument}?timeframe=h1` |
-| Paper account | `/account/overview`, `/positions/open`, `/positions/closed`, `/risk/metrics`, `/performance`, `/events` |
-| Research | `/research/candidates`, `/research/families`, `/research/baseline` + a snapshot of Edge Validation Experiments 1–2 (`src/data/researchSnapshot.json`) |
-| News & calendar | `/calendar`, `/calendar/{currency}`, `/news`, `/system/data-status` |
+| Dashboard (`#/live`) | `/live/market`, `/live/decision`, `/live/analysis`, `/live/analysis/multi-timeframe`, `/live/synthetic-symbols`, `/runtime/status`, `/risk/metrics`, `/deriv/status`, `/deriv/demo/*` |
+| Live Markets | `/live/market` |
+| Trade Signals | `/decisions?instrument=…&timeframe=h1` |
+| Paper Trading | `/runtime/status`, `/runtime/positions`, `/runtime/trades`, `/runtime/metrics`, `/runtime/events`, `/risk/metrics`, `/validation` |
+| News & Calendar | `/calendar`, `/calendar/{currency}`, `/news`, `/system/data-status` |
+| Research | `/research/candidates`, `/research/families`, `/research/baseline` + `src/data/researchSnapshot.json` |
+| System Overview | `/health`, `/decisions`, `/runtime/status`, `/calendar` |
+| Test Lab | `/validation`, `/runtime/*`, `/backtests/readiness`, `/live/decision` |
+
+### Dashboard rules
+
+- Every price, candle, level and signal comes from the backend. If the backend has no verified data the screen says so instead of drawing anything.
+- BUY / SELL / NO TRADE, entry, stop, target, confidence and risk are shown exactly as `/live/decision` returns them. The browser never computes a trade.
+- The SMA 10/50 lines on the chart are a drawing aid computed from the verified candles; the legend and analysis cards use the backend's own values.
+- The chart uses TradingView's open-source [Lightweight Charts](https://github.com/tradingview/lightweight-charts) (Apache-2.0); its attribution logo stays on.
 
 ## Run locally
 
@@ -23,7 +32,11 @@ cp .env.example .env.local   # points at the live Render backend by default
 npm run dev                  # http://localhost:5173
 ```
 
-## Deploy (Vercel)
+## Deploy (Cloudflare)
+
+Pushing to `main` runs `.github/workflows/cloudflare-deploy.yml`, which builds and deploys the `tembobot` Worker (see `wrangler.jsonc`).
+
+## Deploy (Vercel, alternative)
 
 1. Import this repo in Vercel. Framework preset: **Vite**. Build command `npm run build`, output `dist`.
 2. Environment variable (optional, this is the default): `VITE_API_BASE_URL=https://tembo-forex-bot.onrender.com`
@@ -38,4 +51,4 @@ npm run dev                  # http://localhost:5173
 - Routing uses URL hashes (`#/decisions/XAU%2FUSD`), so no server rewrite rules are needed on any host.
 - The research snapshot is static. Regenerate it from `research/results/*.json` in the backend repo when new experiments land.
 
-Stack: React 19, TypeScript, Vite 7, Tailwind CSS 4, Recharts, lucide-react.
+Stack: React 19, TypeScript, Vite 7, Tailwind CSS 4, Lightweight Charts, Recharts, lucide-react.

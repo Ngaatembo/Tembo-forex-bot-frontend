@@ -1,5 +1,5 @@
 import { useApi } from '../lib/api';
-import type { AccountOverview, ClosedTrade, EngineEvent, OpenPosition, Performance, RiskMetrics } from '../lib/types';
+import type { PaperValidation, RiskMetrics, RuntimeEvent, RuntimeMetrics, RuntimePosition, RuntimeStatus, RuntimeTrade } from '../lib/types';
 import { STATUS_TEXT, dateTime, humanize, money, pct, price } from '../lib/format';
 import { Card, Empty, ErrorBlock, KV, LoadingBlock, Notice, PageHeader, Pill, RefreshButton, Stat } from '../components/ui';
 
@@ -12,73 +12,54 @@ const LIMIT_LABELS: Record<string, string> = {
   max_exposure_pct: 'Max exposure',
 };
 
+// Live paper runtime: the persistent account the backend trades on paper every cycle.
 export default function Paper() {
-  const account = useApi<AccountOverview>('/account/overview');
-  const open = useApi<OpenPosition[]>('/positions/open');
-  const closed = useApi<ClosedTrade[]>('/positions/closed');
+  const status = useApi<RuntimeStatus>('/runtime/status', { refreshMs: 120_000 });
+  const open = useApi<RuntimePosition[]>('/runtime/positions', { refreshMs: 120_000 });
+  const closed = useApi<RuntimeTrade[]>('/runtime/trades');
+  const metrics = useApi<RuntimeMetrics>('/runtime/metrics');
+  const events = useApi<RuntimeEvent[]>('/runtime/events?limit=25');
   const risk = useApi<RiskMetrics>('/risk/metrics');
-  const perf = useApi<Performance>('/performance');
-  const events = useApi<EngineEvent[]>('/events');
-  const validation = useApi<import('../lib/types').PaperValidation>('/validation');
-  const loading = account.loading || open.loading || closed.loading;
-  const reloadAll = () => [account, open, closed, risk, perf, events, validation].forEach((x) => x.reload());
-  const a = account.data;
+  const validation = useApi<PaperValidation>('/validation');
+  const loading = status.loading || open.loading || closed.loading;
+  const reloadAll = () => [status, open, closed, metrics, events, risk, validation].forEach((x) => x.reload());
+  const s = status.data;
+  const equity = s ? s.initial_equity + (s.realized_pnl ?? 0) : null;
+  const perf = metrics.data?.performance;
 
   return (
     <div>
-      <PageHeader title="Paper account" action={<RefreshButton onClick={reloadAll} loading={loading} />}>
-        Simulated trading only. Every trade here passed the full chain: selector, research gate, macro check, risk engine and kill switch.
+      <PageHeader title="Paper trading" action={<RefreshButton onClick={reloadAll} loading={loading} />}>
+        Tembo's persistent paper account. Every cycle runs the full chain on live data: strategy, research gate, macro check, risk engine and kill switch. No real money.
       </PageHeader>
 
-      {a?.note && (
-        <div className="mb-4">
-          <Notice tone="info">{a.note}</Notice>
-        </div>
-      )}
-
-      <div className="mb-4">
-        <Card title="Paper-trading safety validation" subtitle="Synthetic software-path check · no broker contact · no persistent account changes">
-          {validation.loading && !validation.data ? (
-            <LoadingBlock rows={3} />
-          ) : validation.error && !validation.data ? (
-            <ErrorBlock error={validation.error} onRetry={validation.reload} />
-          ) : validation.data ? (
-            <>
-              <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-                <Stat label="Suite" value={validation.data.suite.replace(/-/g, ' ')} />
-                <Stat label="Status" value={validation.data.status} tone={validation.data.status === 'PASS' ? 'up' : 'down'} />
-                <Stat label="Broker contact" value={validation.data.real_broker_contacted ? 'Yes' : 'No'} />
-                <Stat label="State changed" value={validation.data.persistent_state_changed ? 'Yes' : 'No'} />
-              </div>
-              <div className="mt-4 space-y-2">
-                {validation.data.checks.map((check) => (
-                  <div key={check.name} className="rounded-xl border border-line bg-panel-2 p-3">
-                    <div className="flex items-center justify-between gap-3 text-xs">
-                      <span className="font-medium">{humanize(check.name)}</span>
-                      <Pill tone={check.passed ? 'good' : 'bad'}>{check.passed ? 'PASS' : 'FAIL'}</Pill>
-                    </div>
-                    <div className="mt-1 text-[11px] leading-relaxed text-muted">{check.detail}</div>
-                  </div>
-                ))}
-              </div>
-              <div className="mt-3 text-[11px] leading-relaxed text-faint">{validation.data.note}</div>
-            </>
-          ) : null}
-        </Card>
-      </div>
-
       <section className="rounded-2xl border border-line bg-panel p-4 sm:p-5">
-        {account.loading && !a ? (
+        {status.loading && !s ? (
           <LoadingBlock rows={2} />
-        ) : account.error && !a ? (
-          <ErrorBlock error={account.error} onRetry={account.reload} />
-        ) : a ? (
-          <div className="grid grid-cols-2 gap-5 sm:grid-cols-4">
-            <Stat label="Equity" value={money(a.equity)} sub={`Started at ${money(a.initial_equity)}`} tone="gold" />
-            <Stat label="Realized P&L" value={money(a.realized_pnl, { sign: true })} tone={a.realized_pnl < 0 ? 'down' : a.realized_pnl > 0 ? 'up' : undefined} sub={a.initial_equity ? pct(a.realized_pnl / a.initial_equity, 2) : undefined} />
-            <Stat label="Trades closed" value={perf.data?.trade_count ?? '—'} sub={perf.data?.win_rate != null ? `Win rate ${pct(perf.data.win_rate, 0)}` : undefined} />
-            <Stat label="Real money at risk" value={money(a.real_money)} sub={humanize(a.mode)} />
-          </div>
+        ) : status.error && !s ? (
+          <ErrorBlock error={status.error} onRetry={status.reload} />
+        ) : s ? (
+          <>
+            <div className="grid grid-cols-2 gap-5 sm:grid-cols-4">
+              <Stat label="Equity" value={money(equity)} sub={`Started at ${money(s.initial_equity)}`} tone="up" />
+              <Stat
+                label="Realized P&L"
+                value={money(s.realized_pnl, { sign: true })}
+                tone={s.realized_pnl < 0 ? 'down' : s.realized_pnl > 0 ? 'up' : undefined}
+                sub={s.initial_equity ? pct(s.realized_pnl / s.initial_equity, 2) : undefined}
+              />
+              <Stat label="Closed trades" value={perf?.closed_trades ?? '—'} sub={perf?.win_rate != null ? `Win rate ${pct(perf.win_rate, 0)}` : 'No closed trades yet'} />
+              <Stat label="Open positions" value={s.open_positions} sub={`Peak equity ${money(s.peak_equity)}`} />
+            </div>
+            <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-line pt-3 text-xs text-muted">
+              <Pill tone={s.status === 'RUNNING' ? 'good' : 'warn'}>{humanize(s.status)}</Pill>
+              <span>Last cycle {dateTime(s.last_cycle_at)}</span>
+              <span className="text-faint">·</span>
+              <span>Broker contacted: {s.broker_contacted ? 'yes' : 'no'}</span>
+              <span className="text-faint">·</span>
+              <span>Execution: {s.execution_enabled ? 'enabled' : 'disabled'}</span>
+            </div>
+          </>
         ) : null}
       </section>
 
@@ -86,17 +67,11 @@ export default function Paper() {
         <div className="min-w-0 space-y-4 lg:col-span-2">
           <Card title="Open positions" pad={false}>
             {open.loading && !open.data ? (
-              <div className="p-4">
-                <LoadingBlock />
-              </div>
+              <div className="p-4"><LoadingBlock /></div>
             ) : open.error && !open.data ? (
-              <div className="p-4">
-                <ErrorBlock error={open.error} onRetry={open.reload} />
-              </div>
+              <div className="p-4"><ErrorBlock error={open.error} onRetry={open.reload} /></div>
             ) : !open.data?.length ? (
-              <div className="p-4">
-                <Empty title="No open positions" />
-              </div>
+              <div className="p-4"><Empty title="No open positions">Tembo opens a paper position only when a researched strategy triggers and every gate passes.</Empty></div>
             ) : (
               <ul className="divide-y divide-line">
                 {open.data.map((p) => (
@@ -105,42 +80,30 @@ export default function Paper() {
                       <div className="flex items-center gap-2">
                         <span className="num text-sm font-semibold">{p.instrument}</span>
                         <Pill tone={p.direction === 'LONG' ? 'good' : 'bad'}>{p.direction}</Pill>
+                        <span className="text-[11px] text-faint">{p.timeframe.toUpperCase()}</span>
                       </div>
                       <span className="text-xs text-muted">{dateTime(p.entry_time)}</span>
                     </div>
-                    <div className="num mt-2 grid grid-cols-3 gap-2 text-xs">
-                      <div>
-                        <div className="text-faint">Entry</div>
-                        {price(p.entry_price, p.instrument)}
-                      </div>
-                      <div>
-                        <div className="text-faint">Stop</div>
-                        <span className="text-down">{price(p.stop_price, p.instrument)}</span>
-                      </div>
-                      <div>
-                        <div className="text-faint">Size</div>
-                        {p.position_size}
-                      </div>
+                    <div className="num mt-2 grid grid-cols-4 gap-2 text-xs">
+                      <div><div className="text-faint">Entry</div>{price(p.entry_price, p.instrument)}</div>
+                      <div><div className="text-faint">Stop</div><span className="text-down">{price(p.stop_price, p.instrument)}</span></div>
+                      <div><div className="text-faint">Target</div><span className="text-up">{price(p.take_profit_price, p.instrument)}</span></div>
+                      <div><div className="text-faint">Size</div>{p.position_size}</div>
                     </div>
+                    <div className="mt-1 truncate text-[11px] text-faint">Strategy {p.candidate_config_id} · held {p.periods_held} candles</div>
                   </li>
                 ))}
               </ul>
             )}
           </Card>
 
-          <Card title="Closed trades" pad={false}>
+          <Card title="Trade history" pad={false}>
             {closed.loading && !closed.data ? (
-              <div className="p-4">
-                <LoadingBlock />
-              </div>
+              <div className="p-4"><LoadingBlock /></div>
             ) : closed.error && !closed.data ? (
-              <div className="p-4">
-                <ErrorBlock error={closed.error} onRetry={closed.reload} />
-              </div>
+              <div className="p-4"><ErrorBlock error={closed.error} onRetry={closed.reload} /></div>
             ) : !closed.data?.length ? (
-              <div className="p-4">
-                <Empty title="No closed trades yet" />
-              </div>
+              <div className="p-4"><Empty title="No closed trades yet" /></div>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[560px] text-xs">
@@ -173,6 +136,30 @@ export default function Paper() {
               </div>
             )}
           </Card>
+
+          <Card title="Runtime activity" subtitle="Latest decisions from the paper runtime (newest first)">
+            {events.loading && !events.data ? (
+              <LoadingBlock rows={4} />
+            ) : events.error && !events.data ? (
+              <ErrorBlock error={events.error} onRetry={events.reload} />
+            ) : !events.data?.length ? (
+              <Empty title="No activity yet" />
+            ) : (
+              <ol className="relative space-y-3 border-l border-line pl-4">
+                {events.data.map((e, i) => (
+                  <li key={i} className="relative">
+                    <span className="absolute -left-[21px] top-1 h-2.5 w-2.5 rounded-full border-2 border-panel bg-line-2" />
+                    <div className="flex flex-wrap items-center gap-2">
+                      {e.instrument && <span className="num text-xs font-semibold">{e.instrument}</span>}
+                      {e.status && <Pill status={e.status}>{STATUS_TEXT[e.status] ?? humanize(e.status)}</Pill>}
+                      {e.created_at && <span className="text-[11px] text-faint">{dateTime(e.created_at)}</span>}
+                    </div>
+                    {e.reason && <p className="mt-1 text-xs leading-relaxed text-muted">{e.reason}</p>}
+                  </li>
+                ))}
+              </ol>
+            )}
+          </Card>
         </div>
 
         <div className="min-w-0 space-y-4">
@@ -188,35 +175,43 @@ export default function Paper() {
             ) : null}
           </Card>
 
-          <Card title="Engine activity" subtitle="Latest decisions and trade events">
-            {events.loading && !events.data ? (
-              <LoadingBlock rows={4} />
-            ) : events.error && !events.data ? (
-              <ErrorBlock error={events.error} onRetry={events.reload} />
-            ) : !events.data?.length ? (
-              <Empty title="No activity yet" />
+          <Card title="Why Tembo said no" subtitle="Most common reasons across runtime cycles">
+            {metrics.data ? (
+              Object.entries(metrics.data.rejection_reason_counts)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 6)
+                .map(([k, v]) => <KV key={k} k={<span className="line-clamp-2 text-xs">{k}</span>} v={<span className="num">{v}</span>} />)
+            ) : metrics.error ? (
+              <ErrorBlock error={metrics.error} onRetry={metrics.reload} />
             ) : (
-              <ol className="relative space-y-4 border-l border-line pl-4">
-                {events.data.map((e, i) => (
-                  <li key={i} className="relative">
-                    <span className="absolute -left-[21px] top-1 h-2.5 w-2.5 rounded-full border-2 border-panel bg-line-2" />
-                    <div className="flex flex-wrap items-center gap-2">
-                      {e.type === 'DECISION' ? (
-                        <Pill status={e.status}>{STATUS_TEXT[e.status ?? ''] ?? humanize(e.status)}</Pill>
-                      ) : (
-                        <Pill tone={(e.realized_pnl ?? 0) < 0 ? 'bad' : 'good'}>{humanize(e.type)}</Pill>
-                      )}
-                      {e.timestamp && <span className="text-[11px] text-faint">{dateTime(e.timestamp)}</span>}
-                    </div>
-                    <p className="mt-1 text-xs leading-relaxed text-muted">
-                      {e.reason ??
-                        `${e.instrument ?? ''} ${humanize(e.exit_reason)}${e.realized_pnl != null ? `, ${money(e.realized_pnl, { sign: true })}` : ''}`}
-                    </p>
-                  </li>
-                ))}
-              </ol>
+              <LoadingBlock rows={3} />
             )}
           </Card>
+
+          <Card title="Safety validation" subtitle="Synthetic software-path check · no broker contact">
+            {validation.loading && !validation.data ? (
+              <LoadingBlock rows={3} />
+            ) : validation.error && !validation.data ? (
+              <ErrorBlock error={validation.error} onRetry={validation.reload} />
+            ) : validation.data ? (
+              <>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-muted">{validation.data.checks.filter((c) => c.passed).length} / {validation.data.checks.length} checks passed</span>
+                  <Pill tone={validation.data.status === 'PASS' ? 'good' : 'bad'}>{validation.data.status}</Pill>
+                </div>
+                <div className="mt-3 space-y-1.5">
+                  {validation.data.checks.map((c) => (
+                    <div key={c.name} className="flex items-center justify-between gap-2 text-[11px]">
+                      <span className="text-muted">{humanize(c.name)}</span>
+                      <span className={c.passed ? 'text-up' : 'text-down'}>{c.passed ? 'PASS' : 'FAIL'}</span>
+                    </div>
+                  ))}
+                </div>
+              </>
+            ) : null}
+          </Card>
+
+          <Notice tone="info">This page shows the live paper runtime. The older demonstration snapshot is no longer shown here, so every number above comes from the running account.</Notice>
         </div>
       </div>
     </div>
