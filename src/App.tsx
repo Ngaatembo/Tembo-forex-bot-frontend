@@ -1,4 +1,4 @@
-import { useEffect, useState, type ComponentType } from 'react';
+import React, { useEffect, useState, type ComponentType } from 'react';
 import { Activity, LayoutDashboard, Scale, CandlestickChart, Wallet, FlaskConical, Newspaper, ShieldCheck } from 'lucide-react';
 import { API_BASE_URL, onWakeChange, useApi } from './lib/api';
 import type { Health } from './lib/types';
@@ -11,6 +11,27 @@ import Research from './pages/Research';
 import News from './pages/News';
 import Live from './pages/Live';
 import TestLab from './pages/TestLab';
+
+
+class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { error: Error | null }> {
+  state: { error: Error | null } = { error: null };
+  static getDerivedStateFromError(error: Error) { return { error }; }
+  render() {
+    if (!this.state.error) return this.props.children;
+    const error = this.state.error;
+    return (
+      <div className="min-h-screen bg-ink px-5 py-10 text-fg">
+        <div className="mx-auto max-w-xl rounded-2xl border border-down/30 bg-panel p-6">
+          <div className="text-lg font-semibold">Tembo failed to start</div>
+          <p className="mt-2 text-sm text-muted">The frontend loaded, but a browser-side error stopped React from rendering.</p>
+          <div className="mt-4 rounded-lg border border-line bg-ink p-3 font-mono text-xs text-down break-words">{error?.message || 'Unknown runtime error'}</div>
+          <div className="mt-4 text-xs text-faint">API: {API_BASE_URL}</div>
+          <button className="mt-5 rounded-lg bg-gold px-4 py-2 text-sm font-semibold text-ink" onClick={() => window.location.reload()}>Reload Tembo</button>
+        </div>
+      </div>
+    );
+  }
+}
 
 type RouteKey = 'overview' | 'decisions' | 'markets' | 'paper' | 'research' | 'news' | 'live' | 'test-lab';
 
@@ -67,7 +88,7 @@ function StatusChip({ health, loading, waking }: { health: Health | null; loadin
   );
 }
 
-export default function App() {
+function AppShell() {
   const [{ route }, setLoc] = useState(parseHash());
   const [waking, setWaking] = useState(false);
   const health = useApi<Health>('/health');
@@ -164,3 +185,6 @@ export default function App() {
     </div>
   );
 }
+
+
+export default function App() { return <ErrorBoundary><AppShell /></ErrorBoundary>; }
