@@ -10,7 +10,7 @@ function ConnectionBanner({ data }: { data: LiveOverview | null }) {
   const mt5Configured = data?.mt5.status === 'configured';
   const ready = marketVerified || mt5Configured;
   return (
-    <div className={`mb-4 flex items-start gap-3 rounded-2xl border px-4 py-3 ${ready ? 'border-up/25 bg-up-soft/40' : 'border-warn/25 bg-warn-soft/40'}`}>
+    <div className={`mb-5 flex items-start gap-3 rounded-2xl border px-4 py-3 shadow-sm ${ready ? 'border-up/20 bg-up-soft/30' : 'border-warn/20 bg-warn-soft/30'}`}>
       {ready ? <Activity className="mt-0.5 h-5 w-5 shrink-0 text-up" /> : <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-warn" />}
       <div className="min-w-0">
         <div className="text-sm font-medium">
@@ -79,12 +79,12 @@ function MarketChart({ data }: { data: LiveMarket | null }) {
   }
 
   return (
-    <div className="overflow-hidden rounded-xl border border-line bg-panel-2 p-3">
+    <div className="overflow-hidden rounded-2xl border border-line bg-panel-2 p-3 sm:p-4">
       <div className="mb-2 flex items-center justify-between text-[11px] text-muted">
         <span>{candles.length} validated candles · {humanize(data.timeframe)}</span>
         <span>{data.last_update ? dateTime(data.last_update) : '—'}</span>
       </div>
-      <svg viewBox="0 0 1000 240" className="h-64 w-full" role="img" aria-label={`${data.instrument} price chart`}>
+      <svg viewBox="0 0 1000 240" className="h-52 w-full sm:h-64" role="img" aria-label={`${data.instrument} price chart`}>
         <line x1="8" y1="228" x2="992" y2="228" stroke="currentColor" className="text-line" strokeWidth="1" />
         <line x1="8" y1="12" x2="992" y2="12" stroke="currentColor" className="text-line" strokeWidth="1" />
         <polyline points={points} fill="none" stroke="currentColor" className="text-gold" strokeWidth="3" strokeLinejoin="round" strokeLinecap="round" />
@@ -295,20 +295,19 @@ export default function Live({ go: _go }: { go?: (r: string) => void }) {
 
       <ConnectionBanner data={data.data} />
 
-      <div className="mb-4 flex flex-wrap items-center gap-2">
+      <div className="mb-5 rounded-2xl border border-line bg-panel p-2 shadow-sm"><div className="flex flex-wrap items-center gap-2">
         {INSTRUMENTS.map((i) => (
-          <button key={i} onClick={() => setInstrument(i)} className={`rounded-lg border px-3 py-2 text-xs font-medium ${instrument === i ? 'border-gold/40 bg-gold-soft text-fg' : 'border-line bg-panel text-muted'}`}>{i}</button>
+          <button key={i} onClick={() => setInstrument(i)} className={`rounded-xl border px-3 py-2 text-xs font-semibold transition ${instrument === i ? 'border-gold/50 bg-gold-soft text-gold shadow-sm' : 'border-line bg-panel-2 text-muted hover:text-fg'}`}>{i}</button>
         ))}
-        <select value={timeframe} onChange={(e) => setTimeframe(e.target.value)} className="rounded-lg border border-line bg-panel px-3 py-2 text-xs text-fg">
+        <select value={timeframe} onChange={(e) => setTimeframe(e.target.value)} className="rounded-xl border border-line bg-panel-2 px-3 py-2 text-xs font-medium text-fg outline-none">
           {['M5','M15','H1','H4','D1'].map((t) => <option key={t}>{t}</option>)}
         </select>
-        <button onClick={data.reload} className="ml-auto rounded-lg border border-line bg-panel px-3 py-2 text-xs font-medium text-muted hover:text-fg">Refresh</button>
-      </div>
+        <button onClick={data.reload} className="ml-auto rounded-xl border border-line-2 bg-panel-2 px-3 py-2 text-xs font-medium text-muted hover:text-fg">Refresh</button></div></div>
 
       {data.loading && !data.data ? <LoadingBlock rows={6} /> : data.error && !data.data ? <ErrorBlock error={data.error} onRetry={data.reload} /> : data.data ? (
         <>
-          <div className="grid gap-4 lg:grid-cols-4">
-            <Card title="Selected market" subtitle={instrument}>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <Card title="Selected market" subtitle={instrument} className="border-gold/15 bg-gradient-to-br from-panel to-panel-2">
               <div className="flex items-end justify-between gap-3">
                 <div className="num text-2xl font-semibold">{selected?.current_price != null ? price(selected.current_price, instrument) : '—'}</div>
                 <Pill tone={toneFor(selected?.data_status)}>{humanize(selected?.data_status)}</Pill>
@@ -329,21 +328,21 @@ export default function Live({ go: _go }: { go?: (r: string) => void }) {
             </Card>
           </div>
 
-          <div className="mt-4">
+          <div className="mt-3">
             <MarketWorkspace instrument={instrument} timeframe={timeframe} />
           </div>
 
-          <div className="mt-4">
+          <div className="mt-3">
             <AnalysisWorkspace instrument={instrument} timeframe={timeframe} />
           </div>
 
-          <div className="mt-4">
+          <div className="mt-3">
             <DecisionWorkspace instrument={instrument} timeframe={timeframe} />
           </div>
 
-          <div className="mt-4"><RuntimeTelemetry instrument={instrument} /></div>
+          <div className="mt-3"><RuntimeTelemetry instrument={instrument} /></div>
 
-          <div className="mt-4 grid gap-4 lg:grid-cols-2">
+          <div className="mt-3 grid gap-3 lg:grid-cols-2">
             <TradePlan plan={data.data.trade_plan} />
             <Card title="Market context" subtitle="Signals the cockpit will combine once live feeds are connected">
               <div className="grid grid-cols-2 gap-3">
@@ -360,7 +359,7 @@ export default function Live({ go: _go }: { go?: (r: string) => void }) {
             </Card>
           </div>
 
-          <Card title="Cockpit workflow" subtitle="What happens before an order can ever be considered" className="mt-4">
+          <Card title="Cockpit workflow" subtitle="What happens before an order can ever be considered" className="mt-3">
             <div className="grid gap-3 sm:grid-cols-5">
               {['Market feed','Technical analysis','News + calendar','Decision + risk','Human approval'].map((step, i) => (
                 <div key={step} className="flex items-center gap-2 rounded-xl border border-line bg-panel-2 p-3 text-xs">
