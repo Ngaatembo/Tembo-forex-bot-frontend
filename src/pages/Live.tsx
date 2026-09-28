@@ -687,7 +687,7 @@ export default function Live({ go: _go }: { go?: (r: string) => void }) {
               <div className="grid grid-cols-2 gap-x-4 gap-y-3">
                 {[
                   ['Research gate', decision?.data?.strategy_gate?.status ?? 'WAITING'],
-                  ['Macro gate', decision?.data?.macro_risk?.status ?? 'WAITING'],
+                  ['Macro gate', decision?.data?.macro_risk?.level ?? 'WAITING'],
                   ['Risk engine', decision?.data?.risk?.status ?? 'NOT_RUN'],
                   ['Paper eligibility', decision?.data?.paper_eligibility?.status ?? 'NOT_ELIGIBLE'],
                   ['Execution', executionEnabled ? 'ENABLED' : 'DISABLED'],
