@@ -712,11 +712,33 @@ export default function Live({ go: _go }: { go?: (r: string) => void }) {
             </div>
           </TerminalPanel>
 
-          {/* Compact operational state */}
-          <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+          {/* Compact operational state: important status, without the full diagnostic hierarchy. */}
+          <div className="grid gap-3 md:grid-cols-3">
             <MarketWatch data={overview.data} instrument={instrument} setInstrument={setInstrument} market={market.data} />
             <AccountRail account={account.data} risk={risk.data} />
-            <RiskMonitor decision={decision.data} />
+            <TerminalPanel title="Execution status" eyebrow="Server-side safety">
+              <div className="grid grid-cols-2 gap-x-4 gap-y-3">
+                {[
+                  ['Research gate', decision?.data?.strategy_gate?.status ?? 'WAITING'],
+                  ['Macro gate', decision?.data?.macro_risk?.status ?? 'WAITING'],
+                  ['Risk engine', decision?.data?.risk?.status ?? 'NOT_RUN'],
+                  ['Paper eligibility', decision?.data?.paper_eligibility?.status ?? 'NOT_ELIGIBLE'],
+                  ['Execution', executionEnabled ? 'ENABLED' : 'DISABLED'],
+                  ['Market data', backendReady ? 'VERIFIED' : 'UNVERIFIED'],
+                ].map(([label, value]) => (
+                  <div key={label} className="min-w-0">
+                    <div className="text-[8px] uppercase tracking-[0.12em] text-faint">{label}</div>
+                    <div className="mt-1 flex items-center gap-1.5 text-[9px] font-semibold text-fg">
+                      <ToneDot tone={toneFor(value)} />
+                      <span className="truncate">{humanize(String(value))}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-3 border-t border-line pt-3 text-[8px] leading-relaxed text-faint">
+                Server-side gates remain authoritative. This cockpit never creates or sends real-money orders.
+              </div>
+            </TerminalPanel>
           </div>
 
           <div className="grid gap-3 lg:grid-cols-[.8fr_1.2fr]">
@@ -749,19 +771,6 @@ export default function Live({ go: _go }: { go?: (r: string) => void }) {
                 <RuntimeTelemetry data={telemetry.data} instrument={instrument} />
               </div>
               <DerivPanel status={deriv.data} />
-            </div>
-          </details>
-
-          <details className="group border border-line bg-panel">
-            <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-3 py-3 sm:px-4">
-              <div>
-                <div className="text-[8px] font-semibold uppercase tracking-[0.18em] text-faint">Diagnostics</div>
-                <div className="mt-0.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-fg">Server-side decision evidence</div>
-              </div>
-              <span className="text-[9px] font-semibold text-muted group-open:text-gold">Expand</span>
-            </summary>
-            <div className="border-t border-line p-3 sm:p-4">
-              <RiskMonitor decision={decision.data} />
             </div>
           </details>
 
