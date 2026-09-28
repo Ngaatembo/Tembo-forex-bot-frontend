@@ -202,7 +202,7 @@ function DemoExecution({
 
   const checks = [
     { ok: signal === 'BUY' || signal === 'SELL', text: signal === 'BUY' || signal === 'SELL' ? `Tembo says ${signal}` : 'Tembo says NO TRADE' },
-    { ok: eligible, text: eligible ? 'Paper eligibility approved' : 'Not paper-eligible' },
+    { ok: eligible, text: eligible ? (decision?.forward_test?.active ? 'Approved as a forward test' : 'Paper eligibility approved') : 'Not paper-eligible' },
     { ok: connected, text: connected ? 'Deriv demo connected' : 'Deriv demo not connected' },
   ];
   const ready = checks.every((c) => c.ok);

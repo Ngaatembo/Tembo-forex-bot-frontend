@@ -63,6 +63,8 @@ export const STATUS_TEXT: Record<string, string> = {
   NO_VALIDATED_EDGE: 'No edge found',
   NO_TRADE: 'No trade',
   PAPER_TRADE_APPROVED: 'Paper trade approved',
+  FORWARD_TEST_APPROVED: 'Forward-test trade opened',
+  FORWARD_TEST_ELIGIBLE: 'Forward test approved',
   RISK_REJECTED: 'Blocked by risk engine',
 };
 
@@ -73,6 +75,8 @@ export function toneFor(status: string | null | undefined): Tone {
     case 'TRADEABLE':
     case 'PAPER_CANDIDATE':
     case 'PAPER_TRADE_APPROVED':
+    case 'FORWARD_TEST_APPROVED':
+    case 'FORWARD_TEST_ELIGIBLE':
     case 'available':
     case 'ok':
     case 'configured':

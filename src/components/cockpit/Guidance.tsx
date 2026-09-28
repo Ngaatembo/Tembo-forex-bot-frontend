@@ -77,11 +77,12 @@ export function GuidancePanel({
   const conf = finite(tech?.confidence) ? tech!.confidence! : null;
   const band = confidenceBand(conf);
   const rp = riskPct(decision?.risk?.computed_risk_pct);
-  const maxRisk = riskPct(risk?.limits?.max_risk_per_trade_pct);
+  const maxRisk = decision?.forward_test?.active ? riskPct(decision.forward_test.max_risk_per_trade_pct) : riskPct(risk?.limits?.max_risk_per_trade_pct);
   const asOf = decision?.data_quality?.last_candle ?? null;
   const reason = plan?.reason || decision?.strategy_gate?.reason || decision?.message || null;
   const isTrade = signal === 'BUY' || signal === 'SELL';
   const tf = (decision?.timeframe ?? '').toUpperCase();
+  const forward = decision?.forward_test?.active === true;
 
   const slDist = isTrade ? distanceLabel(plan?.entry, plan?.stop_loss, meta.id, pipSize, digits) : null;
   const tpDist = isTrade ? distanceLabel(plan?.entry, plan?.take_profit, meta.id, pipSize, digits) : null;
@@ -102,8 +103,8 @@ export function GuidancePanel({
         },
         {
           label: 'Strategy / research',
-          value: human(decision.strategy_gate?.status, 'Waiting'),
-          tone: toneOf(decision.strategy_gate?.status ?? 'WAITING'),
+          value: forward ? 'Promising · forward test' : human(decision.strategy_gate?.status, 'Waiting'),
+          tone: forward ? 'info' : toneOf(decision.strategy_gate?.status ?? 'WAITING'),
         },
         {
           label: 'Macro risk',
@@ -117,7 +118,7 @@ export function GuidancePanel({
         },
         {
           label: 'Paper eligibility',
-          value: decision.paper_eligibility?.eligible ? 'Approved' : 'Not eligible',
+          value: decision.paper_eligibility?.eligible ? (decision.paper_eligibility.status === 'FORWARD_TEST_ELIGIBLE' ? 'Approved (forward test)' : 'Approved') : 'Not eligible',
           tone: decision.paper_eligibility?.eligible ? 'good' : 'muted',
         },
         {
@@ -138,7 +139,12 @@ export function GuidancePanel({
             <p className="text-[11px] leading-snug text-faint">Server-side decision from verified market data, research, macro risk and the risk engine.</p>
           </div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          {forward && (
+            <Chip tone="info" dot={false}>
+              Forward test · demo only
+            </Chip>
+          )}
           {asOf && (
             <span className="inline-flex items-center gap-1 text-[10px] text-faint">
               <Clock3 className="h-3 w-3" /> {timeLocal(asOf, true)} {tzLabel()}
@@ -181,6 +187,11 @@ export function GuidancePanel({
                 <span className="font-medium text-fg">{meta.code}</span>
                 <span className="text-faint">· {tf}</span>
               </div>
+              {forward && (
+                <div className="mt-1.5 text-[10px] leading-snug text-info">
+                  Gold breakout forward test: paper and Deriv demo only, at {riskPct(decision?.forward_test?.max_risk_per_trade_pct)?.toFixed(1) ?? '0.5'}% risk.
+                </div>
+              )}
             </div>
 
             {/* Confidence */}

@@ -431,6 +431,12 @@ export interface LiveDecision {
     real_broker_contacted: boolean;
     execution_enabled: boolean;
   };
+  forward_test?: {
+    active: boolean;
+    config_id: string | null;
+    max_risk_per_trade_pct: number | null;
+    note: string | null;
+  };
   trade_plan: {
     decision: string;
     direction: string;

@@ -31,7 +31,7 @@ const CHIP: Record<Tone, string> = {
 /** Maps backend status strings to a colour. Unknown values stay neutral. */
 export function toneOf(value: unknown): Tone {
   const s = String(value ?? '').toUpperCase();
-  if (['AVAILABLE', 'OK', 'PASS', 'APPROVED', 'PAPER_ELIGIBLE', 'TRADEABLE', 'LOW', 'CONNECTED', 'VERIFIED', 'BUY', 'UP', 'POSITIVE', 'RUNNING', 'AUTHENTICATED', 'HIGHER_HIGH_HIGHER_LOW', 'CONFIRMED_NO_RELEVANT_NEWS', 'FRESH', 'CONFIGURED'].includes(s)) return 'good';
+  if (['AVAILABLE', 'OK', 'PASS', 'APPROVED', 'PAPER_ELIGIBLE', 'FORWARD_TEST_ELIGIBLE', 'FORWARD_TEST_APPROVED', 'TRADEABLE', 'LOW', 'CONNECTED', 'VERIFIED', 'BUY', 'UP', 'POSITIVE', 'RUNNING', 'AUTHENTICATED', 'HIGHER_HIGH_HIGHER_LOW', 'CONFIRMED_NO_RELEVANT_NEWS', 'FRESH', 'CONFIGURED'].includes(s)) return 'good';
   if (['MEDIUM', 'WAITING', 'DEGRADED', 'STALE', 'PREPARING', 'UNKNOWN', 'PROMISING_NOT_TRADEABLE', 'PROMISING', 'RANGE', 'NEUTRAL', 'MIXED_STRUCTURE', 'UNSTABLE', 'QUIET', 'OVERBOUGHT', 'OVERSOLD', 'HIGH_VOLATILITY', 'NO_TRADE', 'RESEARCH_REQUIRED'].includes(s)) return 'warn';
   if (['BLOCKED', 'REJECTED', 'RISK_REJECTED', 'HIGH', 'UNAVAILABLE', 'OFFLINE', 'SELL', 'DOWN', 'NEGATIVE', 'NO_VALIDATED_EDGE', 'LOWER_HIGH_LOWER_LOW', 'NOT_ELIGIBLE', 'ERROR'].includes(s)) return 'bad';
   return 'muted';
