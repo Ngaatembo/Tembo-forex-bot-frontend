@@ -270,7 +270,7 @@ function AccountRail({ account, risk }: { account: AccountOverview | null; risk:
   return (
     <TerminalPanel title="Paper account" eyebrow="Execution boundary" right={<span className="text-[9px] text-warn">PAPER ONLY</span>}>
       <div className="grid grid-cols-2 gap-3">
-        <Metric label="Balance" value={money(account?.equity)} />
+        <Metric label="Balance" value={money(account?.initial_equity)} />
         <Metric label="Equity" value={money(account?.equity)} />
         <Metric label="Realized P&L" value={money(account?.realized_pnl, { sign: true })} tone={finite(account?.realized_pnl) ? (account!.realized_pnl >= 0 ? 'good' : 'bad') : 'muted'} />
         <Metric label="Open positions" value={String(account?.open_positions_count ?? '—')} />
