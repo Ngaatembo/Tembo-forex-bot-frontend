@@ -1,13 +1,8 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, type ReactNode } from 'react';
 import {
   Activity,
-  AlertTriangle,
-  BarChart3,
   CandlestickChart,
-  CheckCircle2,
-  Crosshair,
   Gauge,
-  Maximize2,
   RefreshCw,
   ShieldCheck,
   Timer,
@@ -15,7 +10,6 @@ import {
   TrendingUp,
   Wifi,
   XCircle,
-  Zap,
 } from 'lucide-react';
 import { useApi } from '../lib/api';
 import type {
@@ -28,9 +22,21 @@ import type {
   RiskMetrics,
   RuntimeMetrics,
 } from '../lib/types';
-import { INSTRUMENTS, dateTime, humanize, money, num, pct, price } from '../lib/format';
+import { INSTRUMENTS, dateTime, humanize, money, price } from '../lib/format';
 
 type Tone = 'good' | 'warn' | 'bad' | 'muted';
+
+type LiveDecisionView = LiveDecision & {
+  news?: {
+    status?: string;
+    freshness?: string;
+    provider?: string;
+    last_successful_fetch?: string | null;
+    error?: string | null;
+    headlines?: Array<{ news_id?: string; timestamp?: string; headline?: string; source?: string; url?: string | null }>;
+  };
+  macro_events?: Array<{ event_id?: string; timestamp?: string; currency?: string; country?: string | null; event_name?: string; importance?: string; previous?: string | number | null; forecast?: string | number | null; actual?: string | number | null; source?: string | null; time_confirmed?: boolean }>;
+};
 
 type DerivStatus = {
   connected?: boolean;
@@ -97,7 +103,7 @@ function TerminalPanel({
   title: string;
   eyebrow?: string;
   right?: React.ReactNode;
-  children: React.ReactNode;
+  children: ReactNode;
   className?: string;
 }) {
   return (
@@ -282,7 +288,7 @@ function Guidance({
   market,
   instrument,
 }: {
-  decision: LiveDecision | null;
+  decision: LiveDecisionView | null;
   market: LiveMarket | null;
   instrument: string;
 }) {
@@ -304,7 +310,7 @@ function Guidance({
             {decisionTone === 'good' ? <TrendingUp className="h-5 w-5" /> : decisionTone === 'bad' ? <TrendingDown className="h-5 w-5" /> : <Timer className="h-5 w-5" />}
             {decisionValue}
           </div>
-          <div className="mt-3 text-[10px] leading-relaxed text-muted">{safeText(decision?.trade_plan?.reason, decision?.message ?? 'Waiting for verified evidence.')}</div>
+          <div className="mt-3 text-[10px] leading-relaxed text-muted">{safeText(decision?.strategy_gate?.reason, decision?.message ?? 'Waiting for verified evidence.')}</div>
           <div className="mt-4 flex items-center gap-2 text-[9px] text-up"><ShieldCheck className="h-3.5 w-3.5" /> Server-side decision. Browser does not calculate signals.</div>
         </div>
 
@@ -419,7 +425,7 @@ function MultiTimeframe({ data }: { data: MultiTimeframeAnalysis | null }) {
   );
 }
 
-function NewsImpact({ decision }: { decision: LiveDecision | null }) {
+function NewsImpact({ decision }: { decision: LiveDecisionView | null }) {
   const news = decision?.news;
   const events = safeArray<any>(decision?.macro_events);
   const headlines = safeArray<any>(news?.headlines);
@@ -469,7 +475,7 @@ function NewsImpact({ decision }: { decision: LiveDecision | null }) {
   );
 }
 
-function RiskMonitor({ decision }: { decision: LiveDecision | null }) {
+function RiskMonitor({ decision }: { decision: LiveDecisionView | null }) {
   const gates = [
     ['Research / strategy gate', decision?.strategy_gate?.status, decision?.strategy_gate?.reason],
     ['Macro-risk gate', decision?.macro_risk?.level, decision?.macro_risk?.reason],
@@ -502,14 +508,14 @@ function RiskMonitor({ decision }: { decision: LiveDecision | null }) {
   );
 }
 
-function TradePlan({ decision, instrument }: { decision: LiveDecision | null; instrument: string }) {
+function TradePlan({ decision, instrument }: { decision: LiveDecisionView | null; instrument: string }) {
   const plan = decision?.trade_plan;
   if (!plan || safeText(plan.decision, 'NO_TRADE') === 'NO_TRADE') {
     return (
       <TerminalPanel title="Tembo's trade plan" eyebrow="Decision output">
         <div className="border border-dashed border-line-2 bg-panel-2 p-4">
           <div className="flex items-center gap-2 text-[11px] font-semibold text-warn"><Timer className="h-4 w-4" /> NO TRADE PLAN</div>
-          <p className="mt-2 text-[9px] leading-relaxed text-faint">{safeText(plan?.reason, 'Waiting for sufficient verified evidence.')}</p>
+          <p className="mt-2 text-[9px] leading-relaxed text-faint">{safeText(decision?.strategy_gate?.reason, decision?.message ?? 'Waiting for sufficient verified evidence.')}</p>
         </div>
       </TerminalPanel>
     );
@@ -572,7 +578,7 @@ export default function Live({ go: _go }: { go?: (r: string) => void }) {
 
   const overview = useApi<LiveOverview>('/live/overview?instrument=' + encodeURIComponent(instrument) + '&timeframe=' + timeframe.toLowerCase());
   const market = useApi<LiveMarket>('/live/market?instrument=' + encodeURIComponent(instrument) + '&timeframe=' + timeframe.toLowerCase() + '&limit=120');
-  const decision = useApi<LiveDecision>('/live/decision?instrument=' + encodeURIComponent(instrument) + '&timeframe=' + timeframe.toLowerCase());
+  const decision = useApi<LiveDecisionView>('/live/decision?instrument=' + encodeURIComponent(instrument) + '&timeframe=' + timeframe.toLowerCase());
   const analysis = useApi<LiveAnalysis>('/live/analysis?instrument=' + encodeURIComponent(instrument) + '&timeframe=' + timeframe.toLowerCase());
   const account = useApi<AccountOverview>('/account/overview');
   const risk = useApi<RiskMetrics>('/risk/metrics');
