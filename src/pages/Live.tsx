@@ -1,448 +1,752 @@
 import { useMemo, useState } from 'react';
-import { Activity, AlertTriangle, ArrowRight, BarChart3, CalendarClock, Crosshair, LineChart, ShieldCheck, Zap, Gauge } from 'lucide-react';
+import {
+  Activity,
+  AlertTriangle,
+  BarChart3,
+  CandlestickChart,
+  CheckCircle2,
+  Crosshair,
+  Gauge,
+  Maximize2,
+  RefreshCw,
+  ShieldCheck,
+  Timer,
+  TrendingDown,
+  TrendingUp,
+  Wifi,
+  XCircle,
+  Zap,
+} from 'lucide-react';
 import { useApi } from '../lib/api';
-import type { LiveAnalysis, LiveDecision, LiveMarket, LiveOverview, MultiTimeframeAnalysis, RuntimeMetrics } from '../lib/types';
-import { INSTRUMENTS, dateTime, humanize, price, toneFor } from '../lib/format';
-import { Card, ErrorBlock, LoadingBlock, PageHeader, Pill, Stat } from '../components/ui';
+import type {
+  AccountOverview,
+  LiveAnalysis,
+  LiveDecision,
+  LiveMarket,
+  LiveOverview,
+  MultiTimeframeAnalysis,
+  RiskMetrics,
+  RuntimeMetrics,
+} from '../lib/types';
+import { INSTRUMENTS, dateTime, humanize, money, num, pct, price } from '../lib/format';
 
-function ConnectionBanner({ data }: { data: LiveOverview | null }) {
-  const marketVerified = data?.market_data.status === 'available';
-  const mt5Configured = data?.mt5.status === 'configured';
-  const ready = marketVerified || mt5Configured;
+type Tone = 'good' | 'warn' | 'bad' | 'muted';
+
+type DerivStatus = {
+  connected?: boolean;
+  configured?: boolean;
+  mode?: string;
+  account_id?: string | null;
+  account_type?: string | null;
+  status?: string | null;
+  currency?: string | null;
+  balance?: number | null;
+  open_positions?: number;
+  message?: string;
+};
+
+const TIMEFRAMES = ['M5', 'M15', 'H1', 'H4', 'D1'] as const;
+
+function finite(value: unknown): value is number {
+  return typeof value === 'number' && Number.isFinite(value);
+}
+
+function safeText(value: unknown, fallback = '—') {
+  return typeof value === 'string' && value.trim() ? value : fallback;
+}
+
+function safeArray<T>(value: unknown): T[] {
+  return Array.isArray(value) ? value as T[] : [];
+}
+
+function riskPercent(value: unknown) {
+  if (!finite(value)) return '—';
+  return (Math.abs(value) <= 1 ? value * 100 : value).toFixed(1) + '%';
+}
+
+function toneFor(value: unknown): Tone {
+  const s = String(value ?? '').toUpperCase();
+  if (['AVAILABLE', 'OK', 'PASS', 'APPROVED', 'PAPER_ELIGIBLE', 'TRADEABLE', 'LOW', 'CONNECTED'].includes(s)) return 'good';
+  if (['MEDIUM', 'WAITING', 'DEGRADED', 'STALE', 'NOT_RUN', 'PREPARING', 'UNKNOWN'].includes(s)) return 'warn';
+  if (['BLOCKED', 'REJECTED', 'RISK_REJECTED', 'HIGH', 'UNAVAILABLE', 'OFFLINE'].includes(s)) return 'bad';
+  return 'muted';
+}
+
+function ToneDot({ tone = 'muted', pulse = false }: { tone?: Tone; pulse?: boolean }) {
+  const cls = tone === 'good' ? 'bg-up' : tone === 'warn' ? 'bg-warn' : tone === 'bad' ? 'bg-down' : 'bg-faint';
+  return <span className={'inline-block h-1.5 w-1.5 rounded-full ' + cls + (pulse ? ' pulse-dot' : '')} />;
+}
+
+function StatusBadge({ value, label }: { value?: unknown; label?: string }) {
+  const tone = toneFor(value);
   return (
-    <div className={`mb-5 flex items-start gap-3 rounded-2xl border px-4 py-3 shadow-sm ${ready ? 'border-up/20 bg-up-soft/30' : 'border-warn/20 bg-warn-soft/30'}`}>
-      {ready ? <Activity className="mt-0.5 h-5 w-5 shrink-0 text-up" /> : <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-warn" />}
-      <div className="min-w-0">
-        <div className="text-sm font-medium">
-          {marketVerified ? 'Market data connection verified' : mt5Configured ? 'MT5 bridge configured' : 'Live market data is not verified yet'}
+    <span className="inline-flex items-center gap-1.5 border border-line bg-panel-2 px-2 py-1 text-[9px] font-semibold uppercase tracking-[0.12em] text-muted">
+      <ToneDot tone={tone} />
+      {label ?? humanize(String(value ?? 'waiting'))}
+    </span>
+  );
+}
+
+function TerminalPanel({
+  title,
+  eyebrow,
+  right,
+  children,
+  className = '',
+}: {
+  title: string;
+  eyebrow?: string;
+  right?: React.ReactNode;
+  children: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <section className={'border border-line bg-panel shadow-[0_12px_40px_rgba(0,0,0,0.16)] ' + className}>
+      <div className="flex min-h-11 items-center justify-between gap-3 border-b border-line px-3 py-2.5 sm:px-4">
+        <div className="min-w-0">
+          {eyebrow && <div className="mb-0.5 text-[8px] font-semibold uppercase tracking-[0.18em] text-faint">{eyebrow}</div>}
+          <h2 className="truncate text-[11px] font-semibold uppercase tracking-[0.12em] text-fg">{title}</h2>
         </div>
-        <p className="mt-0.5 text-xs leading-relaxed text-muted">
-          {marketVerified
-            ? `Tembo is receiving validated market data through ${data?.market_data.provider ?? 'the configured provider'}. MT5 execution remains a separate integration and is still controlled by the execution guard.`
-            : mt5Configured
-              ? 'The MT5 bridge configuration exists, but terminal connectivity still needs verification. Execution remains disabled until the safety requirements are satisfied.'
-              : 'This cockpit fails closed: mock or missing market data is never presented as live. Connect and verify the market-data provider before relying on the cockpit.'}
-        </p>
+        {right}
       </div>
-      <Pill tone={ready ? 'good' : 'warn'}>{data?.mode ?? 'PREPARING'}</Pill>
+      <div className="p-3 sm:p-4">{children}</div>
+    </section>
+  );
+}
+
+function Metric({ label, value, sub, tone = 'muted' }: { label: string; value: string; sub?: string; tone?: Tone }) {
+  const cls = tone === 'good' ? 'text-up' : tone === 'warn' ? 'text-warn' : tone === 'bad' ? 'text-down' : 'text-fg';
+  return (
+    <div className="min-w-0 border-l border-line pl-3 first:border-l-0 first:pl-0">
+      <div className="text-[8px] font-medium uppercase tracking-[0.14em] text-faint">{label}</div>
+      <div className={'num mt-1 truncate text-sm font-semibold ' + cls}>{value}</div>
+      {sub && <div className="mt-0.5 truncate text-[9px] text-faint">{sub}</div>}
     </div>
   );
 }
 
-function TradePlan({ plan }: { plan: LiveOverview['trade_plan'] }) {
+function EmptyState({ title, message }: { title: string; message: string }) {
   return (
-    <Card title="Trade plan" subtitle="Generated only when the decision engine has enough evidence">
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <Stat label="Decision" value={humanize(plan.decision)} />
-        <Stat label="Entry" value={price(plan.entry_price, plan.instrument)} />
-        <Stat label="Stop loss" value={price(plan.stop_loss, plan.instrument)} />
-        <Stat label="Take profit" value={price(plan.take_profit, plan.instrument)} />
+    <div className="grid min-h-40 place-items-center border border-dashed border-line-2 bg-panel-2 px-5 text-center">
+      <div>
+        <Activity className="mx-auto h-5 w-5 text-faint" />
+        <div className="mt-2 text-xs font-medium text-muted">{title}</div>
+        <div className="mt-1 max-w-sm text-[10px] leading-relaxed text-faint">{message}</div>
       </div>
-      <div className="mt-4 rounded-xl border border-line bg-panel-2 p-3 text-xs leading-relaxed text-muted">
-        <div className="mb-1 flex items-center gap-2 font-medium text-fg"><ShieldCheck className="h-4 w-4 text-up" /> Risk gate</div>
-        {plan.reason}
-      </div>
-    </Card>
+    </div>
   );
 }
 
-function MarketChart({ data }: { data: LiveMarket | null }) {
-  const points = useMemo(() => {
-    const candles = Array.isArray(data?.candles) ? data.candles : [];
-    if (!candles.length) return '';
-    const closes = candles.map((c) => c.close);
-    const min = Math.min(...closes);
-    const max = Math.max(...closes);
-    const span = max - min || 1;
-    return closes
-      .map((value, index) => {
-        const x = 8 + (index / Math.max(closes.length - 1, 1)) * 984;
-        const y = 12 + (1 - (value - min) / span) * 216;
-        return `${x.toFixed(1)},${y.toFixed(1)}`;
-      })
-      .join(' ');
+function CandleChart({ data }: { data: LiveMarket | null }) {
+  const candles = useMemo(() => {
+    const raw = safeArray<any>(data?.candles);
+    return raw
+      .filter((c) => finite(Number(c?.open)) && finite(Number(c?.high)) && finite(Number(c?.low)) && finite(Number(c?.close)))
+      .slice(-90)
+      .map((c) => ({
+        timestamp: safeText(c.timestamp, ''),
+        open: Number(c.open),
+        high: Number(c.high),
+        low: Number(c.low),
+        close: Number(c.close),
+        volume: finite(Number(c.volume)) ? Number(c.volume) : null,
+      }));
   }, [data]);
 
-  const candles = Array.isArray(data?.candles) ? data.candles : [];
-  if (!data || data.status === 'mock' || !candles.length) {
-    return (
-      <div className="grid min-h-64 place-items-center rounded-xl border border-dashed border-line-2 bg-panel-2 px-5 text-center">
-        <div>
-          <LineChart className="mx-auto h-7 w-7 text-faint" />
-          <div className="mt-2 text-sm font-medium">Chart waiting for verified market data</div>
-          <p className="mt-1 max-w-md text-xs leading-relaxed text-muted">
-            Tembo does not draw a synthetic chart from mock prices. Once a real provider is connected, validated candles will appear here.
-          </p>
-        </div>
-      </div>
-    );
+  if (!data || data.status !== 'available' || candles.length === 0) {
+    return <EmptyState title="Waiting for verified market data" message="No synthetic prices are drawn here. The chart renders only validated candles returned by Tembo's live market endpoint." />;
   }
 
+  const highs = candles.map((c) => c.high);
+  const lows = candles.map((c) => c.low);
+  const max = Math.max(...highs);
+  const min = Math.min(...lows);
+  const span = max - min || 1;
+  const maxVolume = Math.max(...candles.map((c) => c.volume ?? 0), 1);
+  const left = 48;
+  const right = 920;
+  const top = 24;
+  const bottom = 326;
+  const chartWidth = right - left;
+  const step = chartWidth / Math.max(candles.length, 1);
+  const candleWidth = Math.max(2, Math.min(8, step * 0.62));
+  const y = (v: number) => top + (max - v) / span * (bottom - top);
+
   return (
-    <div className="overflow-hidden rounded-2xl border border-line bg-panel-2 p-3 sm:p-4">
-      <div className="mb-2 flex items-center justify-between text-[11px] text-muted">
+    <div className="overflow-hidden border border-line bg-[#0b1016]">
+      <div className="flex items-center justify-between border-b border-line px-3 py-2 text-[9px] text-faint">
         <span>{candles.length} validated candles · {humanize(data.timeframe)}</span>
         <span>{data.last_update ? dateTime(data.last_update) : '—'}</span>
       </div>
-      <svg viewBox="0 0 1000 240" className="h-52 w-full sm:h-64" role="img" aria-label={`${data.instrument} price chart`}>
-        <line x1="8" y1="228" x2="992" y2="228" stroke="currentColor" className="text-line" strokeWidth="1" />
-        <line x1="8" y1="12" x2="992" y2="12" stroke="currentColor" className="text-line" strokeWidth="1" />
-        <polyline points={points} fill="none" stroke="currentColor" className="text-gold" strokeWidth="3" strokeLinejoin="round" strokeLinecap="round" />
-      </svg>
-      <div className="mt-2 flex items-center justify-between text-xs text-muted">
-        <span>Provider: {humanize(data.provider)}</span>
-        <Pill tone="good">Data quality verified</Pill>
-      </div>
-    </div>
-  );
-}
-
-
-function AnalysisWorkspace({ instrument, timeframe }: { instrument: string; timeframe: string }) {
-  const analysis = useApi<LiveAnalysis>(`/live/analysis?instrument=${encodeURIComponent(instrument)}&timeframe=${timeframe.toLowerCase()}`);
-  const [showMulti, setShowMulti] = useState(false);
-  const multi = useApi<MultiTimeframeAnalysis>(showMulti ? `/live/analysis/multi-timeframe?instrument=${encodeURIComponent(instrument)}` : null);
-
-  const item = analysis.data?.analysis;
-  const cards = [
-    ['Trend', item?.trend?.state ?? 'Waiting'],
-    ['Momentum', item?.momentum?.state ?? 'Waiting'],
-    ['Volatility', item?.volatility?.state ?? 'Waiting'],
-    ['Structure', item?.market_structure?.label ?? 'Waiting'],
-  ];
-
-  return (
-    <Card title="Technical analysis" subtitle="Deterministic analysis of verified completed candles · no trade signal">
-      {analysis.loading && !analysis.data ? <LoadingBlock rows={4} /> : analysis.error && !analysis.data ? (
-        <ErrorBlock error={analysis.error} onRetry={analysis.reload} />
-      ) : (
-        <>
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-            {cards.map(([label, value]) => <Stat key={label} label={label} value={humanize(value)} />)}
-          </div>
-          <div className="mt-4 grid gap-3 sm:grid-cols-2">
-            <div className="rounded-xl border border-line bg-panel-2 p-3">
-              <div className="text-xs font-medium text-fg">Momentum</div>
-              <div className="mt-2 text-sm">{item?.momentum?.rsi_14 != null ? `RSI 14 · ${item.momentum.rsi_14.toFixed(1)}` : 'RSI waiting for warm-up'}</div>
-              <div className="mt-1 text-xs text-muted">{humanize(item?.momentum?.state)}</div>
-            </div>
-            <div className="rounded-xl border border-line bg-panel-2 p-3">
-              <div className="text-xs font-medium text-fg">Support / resistance</div>
-              <div className="mt-2 grid grid-cols-2 gap-2 text-sm">
-                <span>Support: {price(item?.support_resistance?.support, instrument)}</span>
-                <span>Resistance: {price(item?.support_resistance?.resistance, instrument)}</span>
-              </div>
-            </div>
-          </div>
-          <div className="mt-4 rounded-xl border border-line bg-panel-2 p-3 text-xs leading-relaxed text-muted">
-            {analysis.data?.message ?? 'Waiting for verified candles.'}
-          </div>
-        </>
-      )}
-
-      <div className="mt-4 border-t border-line pt-4">
-        <div className="mb-2 flex items-center justify-between">
-          <div>
-            <div className="text-xs font-medium text-fg">Multi-timeframe context</div>
-            <div className="text-[11px] text-muted">Loads on demand so the live cockpit does not exhaust the provider quota.</div>
-          </div>
-          <button
-            onClick={() => setShowMulti((v) => !v)}
-            className="rounded-lg border border-line bg-panel px-3 py-1.5 text-[11px] font-medium text-muted hover:text-fg"
-          >
-            {showMulti ? 'Hide' : 'Load M5 → D1'}
-          </button>
-        </div>
-        {showMulti && <div className="mb-2 flex items-center justify-between">
-          <div className="text-[11px] text-muted">Same deterministic engine across M5 → D1</div>
-          <Pill tone={multi.data?.status === 'available' ? 'good' : 'warn'}>{humanize(multi.data?.status)}</Pill>
-        </div>}
-        {showMulti && <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
-          {['m5','m15','h1','h4','d1'].map((tf) => {
-            const value = multi.data?.timeframes?.[tf];
-            const state = value && 'trend' in value ? value.trend?.state ?? 'Waiting' : value?.status ?? 'Waiting';
-            return <div key={tf} className="rounded-lg border border-line bg-panel p-2 text-center"><div className="text-[10px] text-muted">{tf.toUpperCase()}</div><div className="mt-1 text-xs font-medium">{humanize(state)}</div></div>;
+      <div className="overflow-x-auto">
+        <svg viewBox="0 0 980 370" className="block h-[290px] min-w-[640px] w-full sm:h-[360px]" role="img" aria-label={data.instrument + ' validated candlestick chart'}>
+          {[0, 1, 2, 3, 4].map((i) => {
+            const gy = top + i * ((bottom - top) / 4);
+            const value = max - i * (span / 4);
+            return (
+              <g key={i}>
+                <line x1={left} y1={gy} x2={right} y2={gy} stroke="currentColor" className="text-line" strokeWidth="1" opacity="0.7" />
+                <text x="935" y={gy + 3} fill="currentColor" className="text-[9px] fill-muted">{price(value, data.instrument)}</text>
+              </g>
+            );
           })}
-        </div>}
+          {candles.map((c, i) => {
+            const x = left + i * step + step / 2;
+            const up = c.close >= c.open;
+            const bodyTop = y(Math.max(c.open, c.close));
+            const bodyBottom = y(Math.min(c.open, c.close));
+            const bodyHeight = Math.max(1.5, bodyBottom - bodyTop);
+            const volumeHeight = ((c.volume ?? 0) / maxVolume) * 28;
+            return (
+              <g key={c.timestamp + '-' + i}>
+                <line x1={x} y1={y(c.high)} x2={x} y2={y(c.low)} stroke="currentColor" className={up ? 'text-up' : 'text-down'} strokeWidth="1" />
+                <rect x={x - candleWidth / 2} y={bodyTop} width={candleWidth} height={bodyHeight} className={up ? 'fill-up' : 'fill-down'} opacity="0.9" />
+                {volumeHeight > 0 && <rect x={x - candleWidth / 2} y={350 - volumeHeight} width={candleWidth} height={volumeHeight} className={up ? 'fill-up' : 'fill-down'} opacity="0.25" />}
+              </g>
+            );
+          })}
+          <line x1={left} y1={340} x2={right} y2={340} stroke="currentColor" className="text-line-2" />
+          <text x={left} y="362" fill="currentColor" className="text-[9px] fill-faint">{candles[0]?.timestamp ? dateTime(candles[0].timestamp) : '—'}</text>
+          <text x={right - 130} y="362" fill="currentColor" className="text-[9px] fill-faint">{candles[candles.length - 1]?.timestamp ? dateTime(candles[candles.length - 1].timestamp) : '—'}</text>
+        </svg>
       </div>
-    </Card>
-  );
-}
-
-function DecisionWorkspace({ instrument, timeframe }: { instrument: string; timeframe: string }) {
-  const decision = useApi<LiveDecision>(
-    `/live/decision?instrument=${encodeURIComponent(instrument)}&timeframe=${timeframe.toLowerCase()}`,
-  );
-  const plan = decision.data?.trade_plan;
-
-  return (
-    <Card title="Multi-factor decision" subtitle="Technical evidence + candlestick evidence + macro risk · read-only">
-      {decision.loading && !decision.data ? <LoadingBlock rows={5} /> : decision.error && !decision.data ? (
-        <ErrorBlock error={decision.error} onRetry={decision.reload} />
-      ) : (
-        <>
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-            <Stat label="Decision" value={humanize(decision.data?.decision)} />
-            <Stat label="Confidence" value={plan?.confidence != null ? `${plan.confidence.toFixed(0)} / 100` : '—'} />
-            <Stat label="Risk / reward" value={plan?.risk_reward != null ? `1:${plan.risk_reward.toFixed(1)}` : '—'} />
-            <Stat label="Macro risk" value={humanize(decision.data?.macro_risk?.level)} />
-          </div>
-
-          {plan ? (
-            <>
-              <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
-                <Stat label="Entry" value={price(plan.entry, instrument)} />
-                <Stat label="Stop loss" value={price(plan.stop_loss, instrument)} />
-                <Stat label="Take profit" value={price(plan.take_profit, instrument)} />
-                <Stat label="Direction" value={humanize(plan.direction)} />
-              </div>
-
-              <div className="mt-4 grid gap-2 sm:grid-cols-2">
-                {(plan.factors ?? []).map((factor) => (
-                  <div key={factor.name} className="rounded-xl border border-line bg-panel-2 p-3">
-                    <div className="flex items-center justify-between text-xs">
-                      <span className="font-medium">{humanize(factor.name)}</span>
-                      <span className="num">{factor.score != null ? factor.score.toFixed(0) : '—'} / {factor.direction ?? '—'}</span>
-                    </div>
-                    <p className="mt-1 text-[11px] leading-relaxed text-muted">{factor.reason}</p>
-                  </div>
-                ))}
-              </div>
-
-              {(plan.rejection_reasons ?? []).length > 0 && (
-                <div className="mt-4 rounded-xl border border-warn/25 bg-warn-soft/40 p-3 text-xs leading-relaxed">
-                  <div className="font-medium">Decision restrictions</div>
-                  <ul className="mt-1 list-disc space-y-1 pl-4 text-muted">
-                    {(plan.rejection_reasons ?? []).map((reason) => <li key={reason}>{reason}</li>)}
-                  </ul>
-                </div>
-              )}
-            </>
-          ) : (
-            <div className="mt-4 rounded-xl border border-dashed border-line-2 bg-panel-2 p-4 text-xs leading-relaxed text-muted">
-              {decision.data?.message ?? 'Waiting for verified market data.'}
-            </div>
-          )}
-
-          {decision.data?.macro_risk && (
-            <div className="mt-4 rounded-xl border border-line bg-panel-2 p-3 text-xs leading-relaxed text-muted">
-              <div className="font-medium text-fg">Economic calendar guard · {humanize(decision.data.macro_risk.level)}</div>
-              <div className="mt-1">{decision.data.macro_risk.reason}</div>
-            </div>
-          )}
-        </>
-      )}
-    </Card>
-  );
-}
-
-function MarketWorkspace({ instrument, timeframe }: { instrument: string; timeframe: string }) {
-  const market = useApi<LiveMarket>(`/live/market?instrument=${encodeURIComponent(instrument)}&timeframe=${timeframe.toLowerCase()}&limit=120`);
-
-  return (
-    <Card title="Live market workspace" subtitle="Quote + validated candles · read-only">
-      {market.loading && !market.data ? <LoadingBlock rows={4} /> : market.error && !market.data ? (
-        <ErrorBlock error={market.error} onRetry={market.reload} />
-      ) : (
-        <>
-          <div className="mb-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
-            <Stat label="Quote" value={market.data?.current_price != null ? price(market.data.current_price, instrument) : '—'} />
-            <Stat label="Feed" value={humanize(market.data?.status)} />
-            <Stat label="Candles" value={(Array.isArray(market.data?.candles) ? market.data.candles.length : 0).toString()} />
-            <Stat label="Quality" value={market.data?.data_quality?.is_clean ? 'Verified' : 'Waiting'} />
-          </div>
-          <MarketChart data={market.data} />
-          <div className="mt-3 flex items-start gap-2 rounded-xl border border-line bg-panel-2 p-3 text-xs leading-relaxed text-muted">
-            <BarChart3 className="mt-0.5 h-4 w-4 shrink-0 text-gold" />
-            {market.data?.message ?? 'Waiting for market data.'}
-          </div>
-        </>
-      )}
-    </Card>
-  );
-}
-
-function RuntimeTelemetry({ instrument }: { instrument: string }) {
-  const metrics = useApi<RuntimeMetrics>('/runtime/metrics');
-  if (metrics.loading && !metrics.data) return <Card title="Paper runtime telemetry" subtitle="Persistent evidence from the live-data paper engine"><LoadingBlock rows={2} /></Card>;
-  if (metrics.error && !metrics.data) return <Card title="Paper runtime telemetry" subtitle="Persistent evidence from the live-data paper engine"><ErrorBlock error={metrics.error} onRetry={metrics.reload} /></Card>;
-  const p = metrics.data?.performance;
-  const instrumentEvents = metrics.data?.instrument_event_counts?.[instrument] ?? 0;
-  return <Card title="Paper runtime telemetry" subtitle="Persistent evidence from the live-data paper engine">
-    <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
-      <Stat label="Cycles" value={String(metrics.data?.cycles_observed ?? 0)} />
-      <Stat label="Events" value={String(metrics.data?.events_observed ?? 0)} />
-      <Stat label="Closed trades" value={String(p?.closed_trades ?? 0)} />
-      <Stat label="Realized P&L" value={`${(p?.realized_pnl ?? 0).toFixed(2)}`} />
-      <Stat label={`${instrument} events`} value={String(instrumentEvents)} />
+      <div className="flex items-center justify-between border-t border-line px-3 py-2 text-[9px] text-faint">
+        <span>Provider: {humanize(data.provider)}</span>
+        <span className="inline-flex items-center gap-1.5 text-up"><ToneDot tone="good" /> Data quality verified</span>
+      </div>
     </div>
-    <div className="mt-3 flex items-center gap-2 text-xs text-muted"><Gauge className="h-4 w-4 text-gold" /> {metrics.data?.execution_enabled ? 'Execution flag is ON — verify configuration.' : 'Paper-only: broker execution disabled and broker not contacted.'}</div>
-  </Card>;
+  );
+}
+
+function MarketWatch({
+  data,
+  instrument,
+  setInstrument,
+  market,
+}: {
+  data: LiveOverview | null;
+  instrument: string;
+  setInstrument: (v: string) => void;
+  market: LiveMarket | null;
+}) {
+  const items = safeArray<any>(data?.instruments);
+  return (
+    <TerminalPanel title="Market watch" eyebrow="Instruments" right={<span className="text-[9px] text-up">LIVE DATA</span>}>
+      <div className="space-y-1">
+        {items.map((item) => {
+          const selected = item?.instrument === instrument;
+          const current = selected && finite(Number(market?.current_price))
+            ? Number(market?.current_price)
+            : finite(Number(item?.current_price))
+              ? Number(item.current_price)
+              : null;
+          return (
+            <button
+              key={String(item?.instrument)}
+              onClick={() => setInstrument(String(item?.instrument))}
+              className={'flex w-full items-center justify-between border px-2.5 py-2 text-left transition ' + (selected ? 'border-gold/50 bg-gold-soft/50' : 'border-transparent hover:border-line hover:bg-panel-2')}
+            >
+              <span className="flex min-w-0 items-center gap-2">
+                <ToneDot tone={toneFor(item?.data_status)} pulse={selected} />
+                <span className="text-[10px] font-semibold text-fg">{safeText(item?.instrument)}</span>
+              </span>
+              <span className="num text-[10px] text-muted">{current != null ? price(current, String(item?.instrument)) : '—'}</span>
+            </button>
+          );
+        })}
+        {items.length === 0 && <div className="py-4 text-center text-[10px] text-faint">No verified instruments returned.</div>}
+      </div>
+    </TerminalPanel>
+  );
+}
+
+function AccountRail({ account, risk }: { account: AccountOverview | null; risk: RiskMetrics | null }) {
+  return (
+    <TerminalPanel title="Paper account" eyebrow="Execution boundary" right={<span className="text-[9px] text-warn">PAPER ONLY</span>}>
+      <div className="grid grid-cols-2 gap-3">
+        <Metric label="Balance" value={money(account?.equity)} />
+        <Metric label="Equity" value={money(account?.equity)} />
+        <Metric label="Realized P&L" value={money(account?.realized_pnl, { sign: true })} tone={finite(account?.realized_pnl) ? (account!.realized_pnl >= 0 ? 'good' : 'bad') : 'muted'} />
+        <Metric label="Open positions" value={String(account?.open_positions_count ?? '—')} />
+      </div>
+      <div className="mt-4 grid grid-cols-2 gap-2 border-t border-line pt-3 text-[9px] text-muted">
+        <div><span className="text-faint">Mode</span><div className="mt-1 font-semibold text-fg">{safeText(account?.mode, 'PAPER')}</div></div>
+        <div><span className="text-faint">Risk note</span><div className="mt-1 truncate font-semibold text-fg">{safeText(risk?.note, 'Server-side risk engine')}</div></div>
+      </div>
+    </TerminalPanel>
+  );
+}
+
+function Guidance({
+  decision,
+  market,
+  instrument,
+}: {
+  decision: LiveDecision | null;
+  market: LiveMarket | null;
+  instrument: string;
+}) {
+  const plan = decision?.trade_plan;
+  const decisionValue = safeText(decision?.decision, 'NO_TRADE').toUpperCase();
+  const decisionTone: Tone = decisionValue === 'BUY' ? 'good' : decisionValue === 'SELL' ? 'bad' : 'warn';
+  const confidence = finite(plan?.confidence) ? Number(plan?.confidence).toFixed(0) + '%' : '—';
+  const risk = riskPercent(decision?.risk?.computed_risk_pct);
+  return (
+    <TerminalPanel
+      title="Tembo Forex Bot Guidance"
+      eyebrow="Deterministic decision engine"
+      right={<span className="text-[9px] text-faint">{safeText(decision?.methodology, 'READ-ONLY')}</span>}
+    >
+      <div className="grid gap-3 lg:grid-cols-[1.15fr_2.85fr]">
+        <div className="border border-line bg-[#0c1218] p-4">
+          <div className="text-[8px] font-semibold uppercase tracking-[0.18em] text-faint">Current signal</div>
+          <div className={'mt-3 inline-flex items-center gap-2 border px-4 py-2 text-lg font-bold tracking-[0.08em] ' + (decisionTone === 'good' ? 'border-up/40 bg-up-soft text-up' : decisionTone === 'bad' ? 'border-down/40 bg-down-soft text-down' : 'border-warn/40 bg-warn-soft text-warn')}>
+            {decisionTone === 'good' ? <TrendingUp className="h-5 w-5" /> : decisionTone === 'bad' ? <TrendingDown className="h-5 w-5" /> : <Timer className="h-5 w-5" />}
+            {decisionValue}
+          </div>
+          <div className="mt-3 text-[10px] leading-relaxed text-muted">{safeText(decision?.trade_plan?.reason, decision?.message ?? 'Waiting for verified evidence.')}</div>
+          <div className="mt-4 flex items-center gap-2 text-[9px] text-up"><ShieldCheck className="h-3.5 w-3.5" /> Server-side decision. Browser does not calculate signals.</div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-2 md:grid-cols-5">
+          <Metric label="Entry price" value={price(plan?.entry, instrument)} />
+          <Metric label="Stop loss" value={price(plan?.stop_loss, instrument)} tone={plan?.stop_loss != null ? 'bad' : 'muted'} />
+          <Metric label="Take profit" value={price(plan?.take_profit, instrument)} tone={plan?.take_profit != null ? 'good' : 'muted'} />
+          <Metric label="Confidence" value={confidence} />
+          <Metric label="Suggested risk" value={risk} />
+        </div>
+      </div>
+
+      <div className="mt-3 grid gap-2 md:grid-cols-3">
+        <div className="border border-line bg-panel-2 p-3">
+          <div className="text-[8px] uppercase tracking-[0.14em] text-faint">Decision status</div>
+          <div className="mt-2"><StatusBadge value={decision?.status} /></div>
+        </div>
+        <div className="border border-line bg-panel-2 p-3">
+          <div className="text-[8px] uppercase tracking-[0.14em] text-faint">Data quality</div>
+          <div className="mt-2 flex items-center gap-2 text-[10px] font-semibold text-fg">
+            <ToneDot tone={decision?.data_quality?.is_clean ? 'good' : 'warn'} />
+            {decision?.data_quality?.is_clean ? String(decision.data_quality.candle_count ?? '—') + ' validated candles' : 'Waiting for verified candles'}
+          </div>
+        </div>
+        <div className="border border-line bg-panel-2 p-3">
+          <div className="text-[8px] uppercase tracking-[0.14em] text-faint">Paper eligibility</div>
+          <div className="mt-2"><StatusBadge value={decision?.paper_eligibility?.status} label={decision?.paper_eligibility?.eligible ? 'ELIGIBLE' : 'NOT ELIGIBLE'} /></div>
+        </div>
+      </div>
+    </TerminalPanel>
+  );
+}
+
+function AnalysisGrid({ analysis }: { analysis: LiveAnalysis | null }) {
+  const item = analysis?.analysis;
+  const cards = [
+    ['Trend', safeText(item?.trend?.state, 'Not available')],
+    ['Momentum', safeText(item?.momentum?.state, 'Not available')],
+    ['Volatility', safeText(item?.volatility?.state, 'Not available')],
+    ['Market structure', safeText(item?.market_structure?.label, 'Not available')],
+  ];
+  return (
+    <TerminalPanel title="Market analysis" eyebrow="Technical evidence">
+      {analysis?.analysis ? (
+        <>
+          <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
+            {cards.map(([label, value]) => (
+              <div key={label} className="border border-line bg-panel-2 p-3">
+                <div className="text-[8px] uppercase tracking-[0.13em] text-faint">{label}</div>
+                <div className="mt-2 text-[11px] font-semibold text-fg">{humanize(value)}</div>
+              </div>
+            ))}
+          </div>
+          <div className="mt-2 grid gap-2 md:grid-cols-3">
+            <div className="border border-line bg-panel-2 p-3 text-[10px]">
+              <div className="text-faint">RSI 14</div>
+              <div className="num mt-1 text-fg">{finite(item.momentum?.rsi_14) ? Number(item.momentum!.rsi_14).toFixed(1) : '—'}</div>
+            </div>
+            <div className="border border-line bg-panel-2 p-3 text-[10px]">
+              <div className="text-faint">ATR 14</div>
+              <div className="num mt-1 text-fg">{finite(item.volatility?.atr_14) ? Number(item.volatility!.atr_14).toFixed(4) : '—'}</div>
+            </div>
+            <div className="border border-line bg-panel-2 p-3 text-[10px]">
+              <div className="text-faint">ATR %</div>
+              <div className="num mt-1 text-fg">{finite(item.volatility?.atr_percent) ? Number(item.volatility!.atr_percent).toFixed(2) + '%' : '—'}</div>
+            </div>
+          </div>
+        </>
+      ) : <EmptyState title="Analysis unavailable" message={safeText(analysis?.message, 'Waiting for verified candles.')} />}
+    </TerminalPanel>
+  );
+}
+
+function KeyLevels({ analysis, instrument }: { analysis: LiveAnalysis | null; instrument: string }) {
+  const levels = analysis?.analysis?.support_resistance;
+  return (
+    <TerminalPanel title="Key levels" eyebrow="Structure">
+      <div className="space-y-2">
+        {[
+          ['Resistance', levels?.resistance, 'bad'],
+          ['Recent high', levels?.recent_high, 'muted'],
+          ['Support', levels?.support, 'good'],
+          ['Recent low', levels?.recent_low, 'muted'],
+        ].map(([label, value, tone]) => (
+          <div key={String(label)} className="flex items-center justify-between border-b border-line py-2 last:border-b-0">
+            <span className="text-[9px] uppercase tracking-[0.12em] text-faint">{String(label)}</span>
+            <span className={'num text-[10px] font-semibold ' + (tone === 'good' ? 'text-up' : tone === 'bad' ? 'text-down' : 'text-fg')}>{price(finite(Number(value)) ? Number(value) : null, instrument)}</span>
+          </div>
+        ))}
+      </div>
+    </TerminalPanel>
+  );
+}
+
+function MultiTimeframe({ data }: { data: MultiTimeframeAnalysis | null }) {
+  const entries = ['m5', 'm15', 'h1', 'h4', 'd1'];
+  return (
+    <TerminalPanel title="Trend matrix" eyebrow="Multi-timeframe context">
+      <div className="grid grid-cols-5 gap-1.5">
+        {entries.map((tf) => {
+          const value: any = data?.timeframes?.[tf];
+          const state = value && typeof value === 'object' && 'trend' in value ? value.trend?.state : value?.status;
+          return (
+            <div key={tf} className="border border-line bg-panel-2 p-2 text-center">
+              <div className="text-[8px] font-semibold text-faint">{tf.toUpperCase()}</div>
+              <div className="mt-1 text-[9px] font-semibold text-fg">{humanize(safeText(state, 'Waiting'))}</div>
+            </div>
+          );
+        })}
+      </div>
+    </TerminalPanel>
+  );
+}
+
+function NewsImpact({ decision }: { decision: LiveDecision | null }) {
+  const news = decision?.news;
+  const events = safeArray<any>(decision?.macro_events);
+  const headlines = safeArray<any>(news?.headlines);
+  return (
+    <TerminalPanel title="News & calendar" eyebrow="Macro context">
+      <div className="grid gap-3 md:grid-cols-2">
+        <div>
+          <div className="mb-2 flex items-center justify-between">
+            <span className="text-[9px] font-semibold uppercase tracking-[0.12em] text-faint">News impact</span>
+            <StatusBadge value={news?.status} />
+          </div>
+          {headlines.length ? (
+            <div className="space-y-1.5">
+              {headlines.slice(0, 3).map((item, i) => (
+                <div key={String(item?.news_id ?? i)} className="border border-line bg-panel-2 p-2.5">
+                  <div className="text-[10px] font-medium text-fg">{safeText(item?.headline, 'Untitled')}</div>
+                  <div className="mt-1 text-[8px] text-faint">{safeText(item?.source)} · {item?.timestamp ? dateTime(item.timestamp) : '—'}</div>
+                </div>
+              ))}
+            </div>
+          ) : <div className="border border-dashed border-line-2 p-3 text-[9px] text-faint">No verified news data.</div>}
+        </div>
+        <div>
+          <div className="mb-2 flex items-center justify-between">
+            <span className="text-[9px] font-semibold uppercase tracking-[0.12em] text-faint">Upcoming events</span>
+            <StatusBadge value={decision?.macro_risk?.level} />
+          </div>
+          {events.length ? (
+            <div className="space-y-1.5">
+              {events.slice(0, 3).map((event, i) => (
+                <div key={String(event?.event_id ?? i)} className="border border-line bg-panel-2 p-2.5">
+                  <div className="flex items-center justify-between gap-2 text-[10px] font-medium text-fg">
+                    <span>{safeText(event?.event_name, 'Economic event')}</span>
+                    <span className="text-warn">{humanize(safeText(event?.importance))}</span>
+                  </div>
+                  <div className="mt-1 text-[8px] text-faint">{safeText(event?.currency)} · {event?.timestamp ? dateTime(event.timestamp) : '—'}</div>
+                </div>
+              ))}
+            </div>
+          ) : <div className="border border-dashed border-line-2 p-3 text-[9px] text-faint">No verified calendar events.</div>}
+        </div>
+      </div>
+      <div className="mt-3 border border-warn/20 bg-warn-soft/30 p-2.5 text-[9px] leading-relaxed text-muted">
+        Macro risk: <span className="font-semibold text-fg">{humanize(safeText(decision?.macro_risk?.level))}</span> · {safeText(decision?.macro_risk?.reason, 'Macro risk is not available.')}
+      </div>
+    </TerminalPanel>
+  );
+}
+
+function RiskMonitor({ decision }: { decision: LiveDecision | null }) {
+  const gates = [
+    ['Research / strategy gate', decision?.strategy_gate?.status, decision?.strategy_gate?.reason],
+    ['Macro-risk gate', decision?.macro_risk?.level, decision?.macro_risk?.reason],
+    ['Risk engine', decision?.risk?.state ?? decision?.risk?.status, decision?.risk?.reason],
+    ['Paper eligibility', decision?.paper_eligibility?.status, decision?.paper_eligibility?.reason],
+    ['Execution', decision?.execution?.enabled ? 'ENABLED' : 'DISABLED', decision?.execution?.note],
+  ];
+  return (
+    <TerminalPanel title="Risk monitor" eyebrow="Server-side safety state" right={<ShieldCheck className="h-4 w-4 text-up" />}>
+      <div className="space-y-1">
+        {gates.map(([name, state, reason]) => {
+          const tone = name === 'Execution' ? 'good' : toneFor(state);
+          const finalTone = name === 'Execution' && String(state) === 'ENABLED' ? 'warn' : tone;
+          return (
+            <div key={String(name)} className="flex items-center gap-2 border-b border-line py-2 last:border-b-0">
+              <ToneDot tone={finalTone} />
+              <div className="min-w-0 flex-1">
+                <div className="text-[9px] font-medium text-fg">{String(name)}</div>
+                <div className="truncate text-[8px] text-faint">{safeText(reason)}</div>
+              </div>
+              <span className="text-[8px] font-bold uppercase tracking-[0.08em] text-muted">{humanize(safeText(state))}</span>
+            </div>
+          );
+        })}
+      </div>
+      <div className="mt-3 border-t border-line pt-3 text-[8px] leading-relaxed text-faint">
+        The browser only displays the risk hierarchy. Individual kill-switch, stop-validation, position-limit, drawdown and exposure checks remain authoritative on the backend and are never duplicated or bypassed here.
+      </div>
+    </TerminalPanel>
+  );
+}
+
+function TradePlan({ decision, instrument }: { decision: LiveDecision | null; instrument: string }) {
+  const plan = decision?.trade_plan;
+  if (!plan || safeText(plan.decision, 'NO_TRADE') === 'NO_TRADE') {
+    return (
+      <TerminalPanel title="Tembo's trade plan" eyebrow="Decision output">
+        <div className="border border-dashed border-line-2 bg-panel-2 p-4">
+          <div className="flex items-center gap-2 text-[11px] font-semibold text-warn"><Timer className="h-4 w-4" /> NO TRADE PLAN</div>
+          <p className="mt-2 text-[9px] leading-relaxed text-faint">{safeText(plan?.reason, 'Waiting for sufficient verified evidence.')}</p>
+        </div>
+      </TerminalPanel>
+    );
+  }
+  return (
+    <TerminalPanel title="Tembo's trade plan" eyebrow="Decision output">
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-5">
+        <Metric label="Direction" value={safeText(plan.direction)} />
+        <Metric label="Entry" value={price(plan.entry, instrument)} />
+        <Metric label="Stop loss" value={price(plan.stop_loss, instrument)} tone="bad" />
+        <Metric label="Take profit" value={price(plan.take_profit, instrument)} tone="good" />
+        <Metric label="R:R" value={finite(plan.risk_reward) ? '1:' + Number(plan.risk_reward).toFixed(1) : '—'} />
+      </div>
+      <div className="mt-3 border border-line bg-panel-2 p-3 text-[9px] leading-relaxed text-muted">{safeText(plan.methodology, decision?.methodology ?? 'Server-generated trade plan.')}</div>
+    </TerminalPanel>
+  );
+}
+
+function RuntimeTelemetry({ data, instrument }: { data: RuntimeMetrics | null; instrument: string }) {
+  const performance = data?.performance;
+  const instrumentEvents = finite(Number(data?.instrument_event_counts?.[instrument])) ? Number(data!.instrument_event_counts[instrument]) : 0;
+  return (
+    <TerminalPanel title="Paper runtime telemetry" eyebrow="Persistent runtime evidence" right={<span className="text-[8px] font-bold uppercase tracking-[0.12em] text-warn">PAPER ONLY</span>}>
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-5">
+        <Metric label="Cycles" value={String(data?.cycles_observed ?? '—')} />
+        <Metric label="Events" value={String(data?.events_observed ?? '—')} />
+        <Metric label="Closed trades" value={String(performance?.closed_trades ?? '—')} />
+        <Metric label="Realized P&L" value={money(performance?.realized_pnl, { sign: true })} tone={finite(performance?.realized_pnl) ? (performance!.realized_pnl >= 0 ? 'good' : 'bad') : 'muted'} />
+        <Metric label={instrument + ' events'} value={String(instrumentEvents)} />
+      </div>
+      <div className="mt-3 flex items-center gap-2 border-t border-line pt-3 text-[9px] text-faint">
+        <Gauge className="h-3.5 w-3.5 text-gold" />
+        {data?.execution_enabled ? 'Backend reports execution enabled — verify configuration immediately.' : 'Broker execution disabled. This telemetry path remains paper-only.'}
+      </div>
+    </TerminalPanel>
+  );
+}
+
+function DerivPanel({ status }: { status: DerivStatus | null }) {
+  const connected = status?.connected === true;
+  return (
+    <TerminalPanel title="Deriv status" eyebrow="Broker / demo boundary" right={<span className="text-[9px] text-faint">READ-ONLY</span>}>
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+        <Metric label="Connection" value={connected ? 'CONNECTED' : status?.configured ? 'CONFIGURED' : 'NOT CONFIGURED'} tone={connected ? 'good' : status?.configured ? 'warn' : 'muted'} />
+        <Metric label="Mode" value={humanize(status?.mode ?? 'demo')} />
+        <Metric label="Account" value={status?.account_id ? 'DEMO ACCOUNT' : '—'} />
+        <Metric label="Open contracts" value={String(status?.open_positions ?? '—')} />
+      </div>
+      <div className="mt-3 flex items-start gap-2 border-t border-line pt-3 text-[9px] leading-relaxed text-faint">
+        <Wifi className="mt-0.5 h-3.5 w-3.5 shrink-0 text-gold" />
+        {safeText(status?.message, 'Deriv status unavailable.')}
+      </div>
+    </TerminalPanel>
+  );
 }
 
 export default function Live({ go: _go }: { go?: (r: string) => void }) {
   const [instrument, setInstrument] = useState<string>(INSTRUMENTS[0]);
-  const [timeframe, setTimeframe] = useState('H1');
-  const data = useApi<LiveOverview>(`/live/overview?instrument=${encodeURIComponent(instrument)}&timeframe=${timeframe.toLowerCase()}`);
+  const [timeframe, setTimeframe] = useState<string>('H1');
 
-  const selected = useMemo(() => data.data?.instruments.find((x) => x.instrument === instrument) ?? null, [data.data, instrument]);
+  const overview = useApi<LiveOverview>('/live/overview?instrument=' + encodeURIComponent(instrument) + '&timeframe=' + timeframe.toLowerCase());
+  const market = useApi<LiveMarket>('/live/market?instrument=' + encodeURIComponent(instrument) + '&timeframe=' + timeframe.toLowerCase() + '&limit=120');
+  const decision = useApi<LiveDecision>('/live/decision?instrument=' + encodeURIComponent(instrument) + '&timeframe=' + timeframe.toLowerCase());
+  const analysis = useApi<LiveAnalysis>('/live/analysis?instrument=' + encodeURIComponent(instrument) + '&timeframe=' + timeframe.toLowerCase());
+  const account = useApi<AccountOverview>('/account/overview');
+  const risk = useApi<RiskMetrics>('/risk/metrics');
+  const telemetry = useApi<RuntimeMetrics>('/runtime/metrics');
+  const deriv = useApi<DerivStatus>('/deriv/status');
+  const [showMulti, setShowMulti] = useState(false);
+  const multi = useApi<MultiTimeframeAnalysis>(showMulti ? '/live/analysis/multi-timeframe?instrument=' + encodeURIComponent(instrument) : null);
+
+  const selected = useMemo(
+    () => safeArray<any>(overview.data?.instruments).find((x) => x?.instrument === instrument) ?? null,
+    [overview.data, instrument],
+  );
+
+  const refreshAll = () => {
+    overview.reload();
+    market.reload();
+    decision.reload();
+    analysis.reload();
+    account.reload();
+    risk.reload();
+    telemetry.reload();
+    deriv.reload();
+    if (showMulti) multi.reload();
+  };
+
+  const backendReady = overview.data?.market_data?.status === 'available' || market.data?.status === 'available';
+  const executionEnabled = overview.data?.execution?.enabled === true || decision.data?.execution?.enabled === true;
 
   return (
-    <div>
-      <PageHeader title="Live trading cockpit">
-        One workspace for market status, analysis, risk and the eventual MT5 connection. Execution is deliberately not enabled here.
-      </PageHeader>
+    <div className="space-y-3">
+      <div className="flex flex-col gap-3 border-b border-line pb-3 lg:flex-row lg:items-end lg:justify-between">
+        <div>
+          <div className="flex items-center gap-2 text-[9px] font-semibold uppercase tracking-[0.2em] text-gold">
+            <CandlestickChart className="h-3.5 w-3.5" /> Tembo Forex Bot
+          </div>
+          <h1 className="mt-1 text-xl font-semibold tracking-tight text-fg sm:text-2xl">Live Trading Cockpit</h1>
+          <p className="mt-1 max-w-2xl text-[10px] leading-relaxed text-muted">Verified market data, deterministic analysis, server-side risk state and paper execution telemetry in one workstation.</p>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="inline-flex items-center gap-1.5 border border-line bg-panel px-2.5 py-1.5 text-[9px] font-semibold uppercase tracking-[0.12em]">
+            <ToneDot tone={backendReady ? 'good' : 'warn'} pulse={overview.loading || market.loading} />
+            {backendReady ? 'Backend online' : 'Waiting for verified data'}
+          </span>
+          <span className="inline-flex items-center gap-1.5 border border-warn/30 bg-warn-soft/30 px-2.5 py-1.5 text-[9px] font-semibold uppercase tracking-[0.12em] text-warn">
+            <ShieldCheck className="h-3.5 w-3.5" /> {executionEnabled ? 'Execution enabled' : 'Paper execution locked'}
+          </span>
+          <button onClick={refreshAll} className="inline-flex items-center gap-1.5 border border-line bg-panel px-2.5 py-1.5 text-[9px] font-semibold text-muted hover:text-fg" title="Refresh verified data">
+            <RefreshCw className="h-3.5 w-3.5" /> Refresh
+          </button>
+        </div>
+      </div>
 
-      <ConnectionBanner data={data.data} />
+      <div className="flex items-center gap-2 overflow-x-auto border border-line bg-panel px-2 py-2 scrollbar-none">
+        {safeArray<any>(overview.data?.instruments).map((item) => {
+          const active = item?.instrument === instrument;
+          const current = active && finite(Number(market.data?.current_price))
+            ? Number(market.data!.current_price)
+            : finite(Number(item?.current_price))
+              ? Number(item.current_price)
+              : null;
+          return (
+            <button
+              key={String(item?.instrument)}
+              onClick={() => setInstrument(String(item?.instrument))}
+              className={'min-w-[116px] border px-3 py-2 text-left transition ' + (active ? 'border-gold/60 bg-gold-soft/40' : 'border-line bg-panel-2 hover:border-line-2')}
+            >
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-[9px] font-semibold text-fg">{safeText(item?.instrument)}</span>
+                <ToneDot tone={toneFor(item?.data_status)} pulse={active} />
+              </div>
+              <div className="num mt-1 text-[11px] font-semibold text-muted">{current != null ? price(current, String(item?.instrument)) : '—'}</div>
+            </button>
+          );
+        })}
+        {safeArray<any>(overview.data?.instruments).length === 0 && (
+          <div className="px-2 py-1 text-[9px] text-faint">Instrument selector will populate from verified backend data.</div>
+        )}
+        <div className="ml-auto flex shrink-0 items-center gap-1 border-l border-line pl-2">
+          {TIMEFRAMES.map((tf) => (
+            <button
+              key={tf}
+              onClick={() => setTimeframe(tf)}
+              className={'px-2.5 py-1.5 text-[9px] font-semibold ' + (timeframe === tf ? 'bg-gold text-ink' : 'text-muted hover:bg-panel-2 hover:text-fg')}
+            >
+              {tf}
+            </button>
+          ))}
+        </div>
+      </div>
 
-      <div className="mb-5 rounded-2xl border border-line bg-panel p-2 shadow-sm"><div className="flex flex-wrap items-center gap-2">
-        {INSTRUMENTS.map((i) => (
-          <button key={i} onClick={() => setInstrument(i)} className={`rounded-xl border px-3 py-2 text-xs font-semibold transition ${instrument === i ? 'border-gold/50 bg-gold-soft text-gold shadow-sm' : 'border-line bg-panel-2 text-muted hover:text-fg'}`}>{i}</button>
-        ))}
-        <select value={timeframe} onChange={(e) => setTimeframe(e.target.value)} className="rounded-xl border border-line bg-panel-2 px-3 py-2 text-xs font-medium text-fg outline-none">
-          {['M5','M15','H1','H4','D1'].map((t) => <option key={t}>{t}</option>)}
-        </select>
-        <button onClick={data.reload} className="ml-auto rounded-xl border border-line-2 bg-panel-2 px-3 py-2 text-xs font-medium text-muted hover:text-fg">Refresh</button></div></div>
-
-      {data.loading && !data.data ? <LoadingBlock rows={6} /> : data.error && !data.data ? <ErrorBlock error={data.error} onRetry={data.reload} /> : data.data ? (
+      {overview.loading && !overview.data && market.loading && !market.data ? (
+        <div className="grid min-h-64 place-items-center border border-line bg-panel"><div className="text-[10px] text-faint">Connecting to verified Tembo market data…</div></div>
+      ) : (
         <>
-          <section className="overflow-hidden rounded-3xl border border-gold/20 bg-gradient-to-br from-panel via-panel to-panel-2 shadow-lg">
-            <div className="border-b border-line px-4 py-4 sm:px-6">
-              <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="grid gap-3 xl:grid-cols-[minmax(0,1fr)_250px]">
+            <TerminalPanel title={instrument} eyebrow="Live market" right={<StatusBadge value={market.data?.status ?? selected?.data_status} label={backendReady ? 'VERIFIED' : 'WAITING'} />}>
+              <div className="grid gap-4 lg:grid-cols-[1fr_250px]">
                 <div>
-                  <div className="flex items-center gap-2">
-                    <span className="h-2 w-2 rounded-full bg-up" />
-                    <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted">Live market</span>
-                    <span className="text-[11px] text-faint">/</span>
-                    <span className="text-[11px] font-semibold text-gold">{instrument}</span>
+                  <div className="text-[8px] font-semibold uppercase tracking-[0.16em] text-faint">Current price</div>
+                  <div className="num mt-1 text-3xl font-semibold tracking-tight text-fg sm:text-4xl">
+                    {finite(Number(market.data?.current_price)) ? price(Number(market.data!.current_price), instrument) : '—'}
                   </div>
-                  <div className="mt-1 text-xs text-muted">Verified provider data · {timeframe} decision frame</div>
+                  <div className="mt-1 flex flex-wrap items-center gap-2 text-[9px] text-faint">
+                    <span>{market.data?.last_update ? 'Updated ' + dateTime(market.data.last_update) : 'Waiting for timestamp'}</span>
+                    <span>·</span>
+                    <span>{humanize(market.data?.provider ?? selected?.provider)}</span>
+                  </div>
+                  <div className="mt-4 grid grid-cols-3 gap-2">
+                    <Metric label="Feed" value={humanize(market.data?.status ?? selected?.data_status)} />
+                    <Metric label="Frame" value={timeframe} />
+                    <Metric label="Candles" value={String(safeArray<any>(market.data?.candles).length || '—')} />
+                  </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Pill tone={toneFor(selected?.data_status)}>{humanize(selected?.data_status)}</Pill>
-                  <Pill tone={data.data.execution.enabled ? 'warn' : 'good'}>
-                    {data.data.execution.enabled ? 'EXECUTION ON' : 'PAPER ONLY'}
-                  </Pill>
+                <div className="border-l border-line pl-4">
+                  <div className="text-[8px] font-semibold uppercase tracking-[0.16em] text-faint">Data boundary</div>
+                  <div className="mt-2 flex items-center gap-2 text-[10px] font-semibold text-fg"><ToneDot tone={backendReady ? 'good' : 'warn'} /> Live data</div>
+                  <div className="mt-2 flex items-center gap-2 text-[10px] font-semibold text-fg"><ToneDot tone="warn" /> Paper execution</div>
+                  <p className="mt-2 text-[9px] leading-relaxed text-faint">Live data does not mean live-money execution. The frontend does not expose a real-money order path.</p>
                 </div>
               </div>
+              <div className="mt-4">
+                <CandleChart data={market.data} />
+              </div>
+            </TerminalPanel>
+
+            <div className="space-y-3">
+              <MarketWatch data={overview.data} instrument={instrument} setInstrument={setInstrument} market={market.data} />
+              <AccountRail account={account.data} risk={risk.data} />
             </div>
-
-            <div className="grid lg:grid-cols-[1.45fr_.8fr]">
-              <div className="border-b border-line p-5 sm:p-7 lg:border-b-0 lg:border-r">
-                <div className="text-[11px] font-medium uppercase tracking-widest text-muted">Current price</div>
-                <div className="mt-2 flex flex-wrap items-end gap-x-4 gap-y-2">
-                  <div className="num text-4xl font-semibold tracking-tight text-fg sm:text-5xl">
-                    {selected?.current_price != null ? price(selected.current_price, instrument) : '—'}
-                  </div>
-                  <div className="mb-1 text-xs text-muted">
-                    {selected?.last_update ? 'Updated ' + dateTime(selected.last_update) : 'Waiting for timestamp'}
-                  </div>
-                </div>
-                <div className="mt-6 grid grid-cols-3 gap-2 sm:gap-3">
-                  <div className="rounded-2xl border border-line bg-panel/70 p-3">
-                    <div className="text-[10px] uppercase tracking-wider text-muted">Feed</div>
-                    <div className="mt-1 text-sm font-semibold">{humanize(selected?.data_status)}</div>
-                  </div>
-                  <div className="rounded-2xl border border-line bg-panel/70 p-3">
-                    <div className="text-[10px] uppercase tracking-wider text-muted">Provider</div>
-                    <div className="mt-1 truncate text-sm font-semibold">{humanize(selected?.provider)}</div>
-                  </div>
-                  <div className="rounded-2xl border border-line bg-panel/70 p-3">
-                    <div className="text-[10px] uppercase tracking-wider text-muted">Frame</div>
-                    <div className="mt-1 text-sm font-semibold">{timeframe}</div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="p-5 sm:p-6">
-                <div className="flex items-center justify-between">
-                  <div className="text-[11px] font-semibold uppercase tracking-widest text-muted">Engine decision</div>
-                  <Crosshair className="h-4 w-4 text-gold" />
-                </div>
-                <div className="mt-3 flex items-center gap-3">
-                  <div className="grid h-11 w-11 place-items-center rounded-2xl border border-gold/25 bg-gold-soft">
-                    <Crosshair className="h-5 w-5 text-gold" />
-                  </div>
-                  <div className="min-w-0">
-                    <div className="text-xl font-semibold">{humanize(selected?.decision)}</div>
-                    <div className="mt-0.5 text-[11px] text-muted">Deterministic selector</div>
-                  </div>
-                </div>
-                <p className="mt-4 text-xs leading-relaxed text-muted">{selected?.reason ?? 'Waiting for market evidence.'}</p>
-                <div className="mt-5 flex items-start gap-2 rounded-2xl border border-line bg-panel/70 p-3">
-                  <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-up" />
-                  <div>
-                    <div className="text-xs font-semibold">{data.data.execution.enabled ? 'Execution guard requires review' : 'Execution locked'}</div>
-                    <div className="mt-1 text-[11px] leading-relaxed text-muted">{data.data.execution.note}</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="grid border-t border-line sm:grid-cols-2">
-              <div className="flex items-center gap-3 border-b border-line px-4 py-3 sm:border-b-0 sm:border-r sm:px-6">
-                <Zap className="h-4 w-4 text-warn" />
-                <div className="min-w-0">
-                  <div className="text-[10px] uppercase tracking-wider text-muted">MT5 bridge</div>
-                  <div className="text-xs font-semibold">{humanize(data.data.mt5.status)}</div>
-                </div>
-                <Pill tone={toneFor(data.data.mt5.status)}>{humanize(data.data.mt5.status)}</Pill>
-              </div>
-              <div className="flex items-center gap-3 px-4 py-3 sm:px-6">
-                <ShieldCheck className="h-4 w-4 text-up" />
-                <div className="min-w-0">
-                  <div className="text-[10px] uppercase tracking-wider text-muted">Safety mode</div>
-                  <div className="text-xs font-semibold">{data.data.execution.enabled ? 'Execution enabled' : 'Paper only'}</div>
-                </div>
-                <span className="ml-auto text-[10px] font-medium uppercase tracking-wider text-muted">Hard guard</span>
-              </div>
-            </div>
-          </section>
-
-          <div className="mt-3">
-            <MarketWorkspace instrument={instrument} timeframe={timeframe} />
           </div>
 
-          <div className="mt-3">
-            <DecisionWorkspace instrument={instrument} timeframe={timeframe} />
+          <Guidance decision={decision.data} market={market.data} instrument={instrument} />
+
+          <div className="grid gap-3 lg:grid-cols-[1.25fr_.75fr]">
+            <AnalysisGrid analysis={analysis.data} />
+            <KeyLevels analysis={analysis.data} instrument={instrument} />
           </div>
 
-          <div className="mt-3">
-            <AnalysisWorkspace instrument={instrument} timeframe={timeframe} />
-          </div>
-
-          <div className="mt-3"><RuntimeTelemetry instrument={instrument} /></div>
-
-          <div className="mt-3 grid gap-3 lg:grid-cols-2">
-            <TradePlan plan={data.data.trade_plan} />
-            <Card title="Market context" subtitle="Signals the cockpit will combine once live feeds are connected">
-              <div className="grid grid-cols-2 gap-3">
-                <Stat label="Provider" value={humanize(selected?.provider)} />
-                <Stat label="Timeframe" value={timeframe} />
-                <Stat label="News" value={humanize(data.data.context.news)} />
-                <Stat label="Calendar" value={humanize(data.data.context.calendar)} />
+          <div className="grid gap-3 lg:grid-cols-[.8fr_1.2fr]">
+            <MultiTimeframe data={showMulti ? multi.data : null} />
+            <TerminalPanel title="Multi-timeframe analysis" eyebrow="On-demand provider use">
+              <div className="flex items-center justify-between gap-3">
+                <div className="text-[9px] leading-relaxed text-faint">Loads M5 → D1 context only when requested, avoiding unnecessary provider requests.</div>
+                <button onClick={() => setShowMulti((v) => !v)} className="shrink-0 border border-line bg-panel-2 px-3 py-1.5 text-[9px] font-semibold text-muted hover:text-fg">
+                  {showMulti ? 'Hide' : 'Load context'}
+                </button>
               </div>
-              <div className="mt-4 space-y-2 text-xs text-muted">
-                <div className="flex items-center gap-2"><BarChart3 className="h-4 w-4" /> Technical structure and volatility</div>
-                <div className="flex items-center gap-2"><CalendarClock className="h-4 w-4" /> Economic-event risk</div>
-                <div className="flex items-center gap-2"><Activity className="h-4 w-4" /> News and market state</div>
-              </div>
-            </Card>
+              {showMulti && multi.loading && !multi.data && <div className="mt-3 text-[9px] text-faint">Loading verified multi-timeframe analysis…</div>}
+            </TerminalPanel>
           </div>
 
-          <Card title="Cockpit workflow" subtitle="What happens before an order can ever be considered" className="mt-3">
-            <div className="grid gap-3 sm:grid-cols-5">
-              {['Market feed','Technical analysis','News + calendar','Decision + risk','Human approval'].map((step, i) => (
-                <div key={step} className="flex items-center gap-2 rounded-xl border border-line bg-panel-2 p-3 text-xs">
-                  <span className="num grid h-6 w-6 shrink-0 place-items-center rounded-full border border-line-2">{i + 1}</span>
-                  <span>{step}</span>{i < 4 && <ArrowRight className="ml-auto hidden h-3 w-3 text-faint sm:block" />}
-                </div>
-              ))}
+          <NewsImpact decision={decision.data} />
+
+          <div className="grid gap-3 lg:grid-cols-[1.15fr_.85fr]">
+            <TradePlan decision={decision.data} instrument={instrument} />
+            <RiskMonitor decision={decision.data} />
+          </div>
+
+          <RuntimeTelemetry data={telemetry.data} instrument={instrument} />
+          <DerivPanel status={deriv.data} />
+
+          {!decision.data && decision.error && (
+            <div className="flex items-start gap-2 border border-down/30 bg-down-soft/30 p-3 text-[9px] text-down">
+              <XCircle className="h-4 w-4 shrink-0" />
+              <span>Decision endpoint unavailable: {safeText(decision.error.message, 'The decision engine did not respond.')}</span>
             </div>
-            <p className="mt-3 text-xs text-faint">No automatic order endpoint is exposed at this stage. The next integration will be MT5 demo connectivity, not real-money execution.</p>
-          </Card>
+          )}
+
+          <div className="flex flex-wrap items-center justify-between gap-2 border-t border-line pt-3 text-[8px] text-faint">
+            <span>Tembo frontend is a presentation layer. Backend contracts, decision logic and risk gates remain authoritative.</span>
+            <span className="inline-flex items-center gap-1.5"><ShieldCheck className="h-3 w-3 text-up" /> No real-money execution control is exposed here.</span>
+          </div>
         </>
-      ) : null}
+      )}
     </div>
   );
 }
