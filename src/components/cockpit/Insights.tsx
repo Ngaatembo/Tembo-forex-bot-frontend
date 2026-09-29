@@ -305,7 +305,7 @@ export function NotesCard() {
   const notes = [
     'Tembo decides on the server. This screen only shows what the backend decided; it never creates its own signal.',
     'Paper and Deriv demo only. No real money is traded.',
-    'Gold H1 breakout runs as a forward test: its research is promising but not fully proven, so it trades on demo at half the normal risk to collect live evidence.',
+    'USD/JPY H1 breakout runs as a forward test: it passed research on 2012–2022 and on 2026 data, but the edge is small, so it trades on demo at 0.5% risk to collect live evidence.',
     'Tembo blocks trades around medium and high-impact news and when the risk engine rejects a setup.',
     'Let Tembo monitor the market; the plan updates when conditions change.',
     'This is not financial advice. Always manage your risk.',

@@ -15,10 +15,10 @@ export interface InstrumentMeta {
 }
 
 export const CORE_INSTRUMENTS: InstrumentMeta[] = [
+  { id: 'USD/JPY', code: 'USDJPY', name: 'US Dollar / Japanese Yen', short: 'US Dollar / Yen', kind: 'forex', base: 'USD', quote: 'JPY' },
   { id: 'XAU/USD', code: 'XAUUSD', name: 'Gold Spot / US Dollar', short: 'Gold', kind: 'metal', base: 'XAU', quote: 'USD' },
   { id: 'EUR/USD', code: 'EURUSD', name: 'Euro / US Dollar', short: 'Euro / US Dollar', kind: 'forex', base: 'EUR', quote: 'USD' },
   { id: 'GBP/USD', code: 'GBPUSD', name: 'British Pound / US Dollar', short: 'British Pound', kind: 'forex', base: 'GBP', quote: 'USD' },
-  { id: 'USD/JPY', code: 'USDJPY', name: 'US Dollar / Japanese Yen', short: 'US Dollar / Yen', kind: 'forex', base: 'USD', quote: 'JPY' },
   { id: 'SYNTH:R_75', code: 'Volatility 75', name: 'Volatility 75 Index', short: 'Synthetics', kind: 'synthetic' },
   { id: 'SYNTH:BOOM1000', code: 'Boom 1000', name: 'Boom 1000 Index', short: 'Synthetics', kind: 'synthetic' },
   { id: 'SYNTH:CRASH1000', code: 'Crash 1000', name: 'Crash 1000 Index', short: 'Synthetics', kind: 'synthetic' },

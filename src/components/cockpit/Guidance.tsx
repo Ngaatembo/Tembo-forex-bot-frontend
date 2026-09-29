@@ -189,7 +189,7 @@ export function GuidancePanel({
               </div>
               {forward && (
                 <div className="mt-1.5 text-[10px] leading-snug text-info">
-                  Gold breakout forward test: paper and Deriv demo only, at {riskPct(decision?.forward_test?.max_risk_per_trade_pct)?.toFixed(1) ?? '0.5'}% risk.
+                  {meta.code} breakout forward test: paper and Deriv demo only, at {riskPct(decision?.forward_test?.max_risk_per_trade_pct)?.toFixed(1) ?? '0.5'}% risk.
                 </div>
               )}
             </div>

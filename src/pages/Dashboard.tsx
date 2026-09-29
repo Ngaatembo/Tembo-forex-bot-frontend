@@ -15,7 +15,7 @@ import type { ChartLevel } from '../components/PriceChart';
 const q = (id: string) => encodeURIComponent(id);
 
 export default function Dashboard() {
-  const [instrument, setInstrumentState] = useState<string>(() => readHashParam() || 'XAU/USD');
+  const [instrument, setInstrumentState] = useState<string>(() => readHashParam() || 'USD/JPY');
   const [timeframe, setTimeframe] = useState<Timeframe>('H1');
   const tf = timeframe.toLowerCase();
 
