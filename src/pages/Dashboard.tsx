@@ -8,6 +8,7 @@ import { GuidancePanel, signalOf } from '../components/cockpit/Guidance';
 import { InsightCards, NotesCard, TradePlanCard } from '../components/cockpit/Insights';
 import { DerivDemo, MarketWatch, PaperAccount } from '../components/cockpit/Rail';
 import { AdvancedEvidence } from '../components/cockpit/Evidence';
+import { AlertsCard } from '../components/cockpit/Alerts';
 import type { Quote } from '../components/cockpit/types';
 import type { ChartLevel } from '../components/PriceChart';
 
@@ -126,6 +127,9 @@ export default function Dashboard() {
         <aside style={{ gridArea: 'rail' }} className="min-w-0 space-y-3">
           <MarketWatch ids={ids} quotes={quotes} selected={instrument} onSelect={setInstrument} />
           <PaperAccount runtime={runtime.data} error={runtime.error} risk={risk.data} />
+          <div id="alerts-card" className="scroll-mt-20">
+            <AlertsCard />
+          </div>
         </aside>
 
         <div style={{ gridArea: 'guide' }}>

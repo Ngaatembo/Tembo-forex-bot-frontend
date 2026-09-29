@@ -15,6 +15,7 @@ import { API_BASE_URL, onWakeChange, useApi } from './lib/api';
 import type { DerivStatus, Health } from './lib/types';
 import { ElephantMark, Logo } from './components/brand';
 import { Dot, type Tone } from './components/cockpit/common';
+import { AlertBell } from './components/cockpit/Alerts';
 import Overview from './pages/Overview';
 import Decisions from './pages/Decisions';
 import Markets from './pages/Markets';
@@ -150,6 +151,7 @@ function AppShell() {
                 <ShieldCheck className="h-3.5 w-3.5" /> {health.data?.live_execution_enabled ? 'Live execution ON' : 'Paper / demo only'}
               </span>
             </span>
+            <AlertBell />
             <span className="hidden sm:inline-flex">
               <StatusPill tone={backendTone} label={backendLabel} pulse={waking || (health.loading && !health.data)} />
             </span>
