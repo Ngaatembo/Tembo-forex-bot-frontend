@@ -1,0 +1,2143 @@
+{
+ "experiment": "edge_validation_experiment_4_fresh",
+ "generated_at": "2026-09-29T04:21:50.634122+00:00",
+ "data_source": "Deriv public API (api.derivws.com), candles from 2023-01-01",
+ "classification_rule": "see module docstring",
+ "data_coverage": {
+  "EUR/USD:m15": {
+   "candles": 6769,
+   "from": "2025-10-28T06:00:00+00:00",
+   "to": "2026-09-29T04:00:00+00:00"
+  },
+  "EUR/USD:h1": {
+   "candles": 1953,
+   "from": "2026-01-30T00:00:00+00:00",
+   "to": "2026-09-29T04:00:00+00:00"
+  },
+  "EUR/USD:h4": {
+   "candles": 857,
+   "from": "2026-03-12T16:00:00+00:00",
+   "to": "2026-09-29T04:00:00+00:00"
+  },
+  "EUR/USD:d1": {
+   "candles": 260,
+   "from": "2025-09-29T04:12:30+00:00",
+   "to": "2026-09-29T00:00:00+00:00"
+  },
+  "GBP/USD:m15": {
+   "candles": 6769,
+   "from": "2025-10-28T06:00:00+00:00",
+   "to": "2026-09-29T04:00:00+00:00"
+  },
+  "GBP/USD:h1": {
+   "candles": 1953,
+   "from": "2026-01-30T00:00:00+00:00",
+   "to": "2026-09-29T04:00:00+00:00"
+  },
+  "GBP/USD:h4": {
+   "candles": 857,
+   "from": "2026-03-12T16:00:00+00:00",
+   "to": "2026-09-29T04:00:00+00:00"
+  },
+  "GBP/USD:d1": {
+   "candles": 260,
+   "from": "2025-09-29T04:15:35+00:00",
+   "to": "2026-09-29T00:00:00+00:00"
+  },
+  "USD/JPY:m15": {
+   "candles": 6770,
+   "from": "2025-10-28T06:00:00+00:00",
+   "to": "2026-09-29T04:15:00+00:00"
+  },
+  "USD/JPY:h1": {
+   "candles": 1953,
+   "from": "2026-01-30T00:00:00+00:00",
+   "to": "2026-09-29T04:00:00+00:00"
+  },
+  "USD/JPY:h4": {
+   "candles": 857,
+   "from": "2026-03-12T16:00:00+00:00",
+   "to": "2026-09-29T04:00:00+00:00"
+  },
+  "USD/JPY:d1": {
+   "candles": 260,
+   "from": "2025-09-29T04:18:39+00:00",
+   "to": "2026-09-29T00:00:00+00:00"
+  },
+  "XAU/USD:m15": {
+   "candles": 6484,
+   "from": "2025-10-28T06:00:00+00:00",
+   "to": "2026-09-29T04:15:00+00:00"
+  },
+  "XAU/USD:h1": {
+   "candles": 1877,
+   "from": "2026-01-30T00:00:00+00:00",
+   "to": "2026-09-29T04:00:00+00:00"
+  },
+  "XAU/USD:h4": {
+   "candles": 847,
+   "from": "2026-03-12T16:00:00+00:00",
+   "to": "2026-09-29T04:00:00+00:00"
+  },
+  "XAU/USD:d1": {
+   "candles": 259,
+   "from": "2025-09-29T04:21:40+00:00",
+   "to": "2026-09-29T00:00:00+00:00"
+  },
+  "EUR/USD:m5": {
+   "candles": 23560,
+   "from": "2025-10-07T10:00:00+00:00",
+   "to": "2026-09-29T04:10:00+00:00"
+  },
+  "GBP/USD:m5": {
+   "candles": 23561,
+   "from": "2025-10-07T10:00:00+00:00",
+   "to": "2026-09-29T04:10:00+00:00"
+  },
+  "USD/JPY:m5": {
+   "candles": 23561,
+   "from": "2025-10-07T10:00:00+00:00",
+   "to": "2026-09-29T04:15:00+00:00"
+  },
+  "XAU/USD:m5": {
+   "candles": 22637,
+   "from": "2025-10-07T10:00:00+00:00",
+   "to": "2026-09-29T04:15:00+00:00"
+  }
+ },
+ "confirmation": [
+  {
+   "instrument": "EUR/USD",
+   "timeframe": "m15",
+   "family": "breakout",
+   "primary_param": "55",
+   "stage1_gate_status": "REJECT_EARLY",
+   "stage1_oos_pf": 0.904,
+   "fresh_base": {
+    "trades": 169,
+    "profit_factor": 1.126,
+    "win_rate": 0.373,
+    "net_pnl": 176.1,
+    "return_pct": 1.76,
+    "max_drawdown_pct": 0.02
+   },
+   "fresh_high_pf": 1.02,
+   "fresh_yearly_pf": {
+    "2025": 1.098,
+    "2026": 1.132
+   },
+   "fresh_neighbourhood_pf": {
+    "20": 1.07,
+    "30": 1.113,
+    "40": 1.084,
+    "55": 1.126
+   },
+   "fresh_status": "CONFIRMED"
+  },
+  {
+   "instrument": "EUR/USD",
+   "timeframe": "m15",
+   "family": "momentum",
+   "primary_param": "40",
+   "stage1_gate_status": "REJECT_EARLY",
+   "stage1_oos_pf": 0.633,
+   "fresh_base": {
+    "trades": 500,
+    "profit_factor": 0.846,
+    "win_rate": 0.264,
+    "net_pnl": -333.73,
+    "return_pct": -3.34,
+    "max_drawdown_pct": 0.04
+   },
+   "fresh_high_pf": 0.628,
+   "fresh_yearly_pf": {
+    "2025": 0.706,
+    "2026": 0.894
+   },
+   "fresh_neighbourhood_pf": {
+    "10": 0.601,
+    "20": 0.691,
+    "40": 0.846
+   },
+   "fresh_status": "FAILED"
+  },
+  {
+   "instrument": "EUR/USD",
+   "timeframe": "m15",
+   "family": "sma_crossover",
+   "primary_param": "(10, 50)",
+   "stage1_gate_status": "REJECT_EARLY",
+   "stage1_oos_pf": 0.77,
+   "fresh_base": {
+    "trades": 181,
+    "profit_factor": 1.349,
+    "win_rate": 0.42,
+    "net_pnl": 375.34,
+    "return_pct": 3.75,
+    "max_drawdown_pct": 0.02
+   },
+   "fresh_high_pf": 1.162,
+   "fresh_yearly_pf": {
+    "2025": 1.292,
+    "2026": 1.367
+   },
+   "fresh_neighbourhood_pf": {
+    "(10, 50)": 1.349,
+    "(5, 20)": 0.796,
+    "(20, 100)": 1.198
+   },
+   "fresh_status": "CONFIRMED"
+  },
+  {
+   "instrument": "EUR/USD",
+   "timeframe": "h1",
+   "family": "breakout",
+   "primary_param": "30",
+   "stage1_gate_status": "REJECT_EARLY",
+   "stage1_oos_pf": 0.945,
+   "fresh_base": {
+    "trades": 59,
+    "profit_factor": 0.809,
+    "win_rate": 0.305,
+    "net_pnl": -183.43,
+    "return_pct": -1.83,
+    "max_drawdown_pct": 0.03
+   },
+   "fresh_high_pf": 0.762,
+   "fresh_yearly_pf": {
+    "2026": 0.809
+   },
+   "fresh_neighbourhood_pf": {
+    "20": 0.829,
+    "30": 0.809,
+    "40": 0.942,
+    "55": 0.908
+   },
+   "fresh_status": "FAILED"
+  },
+  {
+   "instrument": "EUR/USD",
+   "timeframe": "h1",
+   "family": "momentum",
+   "primary_param": "40",
+   "stage1_gate_status": "REJECT_EARLY",
+   "stage1_oos_pf": 0.756,
+   "fresh_base": {
+    "trades": 165,
+    "profit_factor": 0.447,
+    "win_rate": 0.218,
+    "net_pnl": -846.37,
+    "return_pct": -8.46,
+    "max_drawdown_pct": 0.09
+   },
+   "fresh_high_pf": 0.374,
+   "fresh_yearly_pf": {
+    "2026": 0.447
+   },
+   "fresh_neighbourhood_pf": {
+    "10": 0.789,
+    "20": 0.732,
+    "40": 0.447
+   },
+   "fresh_status": "FAILED"
+  },
+  {
+   "instrument": "EUR/USD",
+   "timeframe": "h1",
+   "family": "sma_crossover",
+   "primary_param": "(10, 50)",
+   "stage1_gate_status": "REJECT_EARLY",
+   "stage1_oos_pf": 0.908,
+   "fresh_base": {
+    "trades": 52,
+    "profit_factor": 0.782,
+    "win_rate": 0.308,
+    "net_pnl": -151.26,
+    "return_pct": -1.51,
+    "max_drawdown_pct": 0.02
+   },
+   "fresh_high_pf": 0.722,
+   "fresh_yearly_pf": {
+    "2026": 0.782
+   },
+   "fresh_neighbourhood_pf": {
+    "(10, 50)": 0.782,
+    "(5, 20)": 0.736,
+    "(20, 100)": 1.866
+   },
+   "fresh_status": "FAILED"
+  },
+  {
+   "instrument": "EUR/USD",
+   "timeframe": "h4",
+   "family": "breakout",
+   "primary_param": "55",
+   "stage1_gate_status": "REJECT_EARLY",
+   "stage1_oos_pf": 0.835,
+   "fresh_base": {
+    "trades": 15,
+    "profit_factor": 1.457,
+    "win_rate": 0.4,
+    "net_pnl": 176.07,
+    "return_pct": 1.76,
+    "max_drawdown_pct": 0.02
+   },
+   "fresh_high_pf": 1.417,
+   "fresh_yearly_pf": {
+    "2026": 1.457
+   },
+   "fresh_neighbourhood_pf": {
+    "20": 0.676,
+    "30": 0.843,
+    "40": 1.015,
+    "55": 1.457
+   },
+   "fresh_status": "TOO_FEW_TRADES"
+  },
+  {
+   "instrument": "EUR/USD",
+   "timeframe": "h4",
+   "family": "momentum",
+   "primary_param": "10",
+   "stage1_gate_status": "REJECT_EARLY",
+   "stage1_oos_pf": 0.902,
+   "fresh_base": {
+    "trades": 110,
+    "profit_factor": 0.669,
+    "win_rate": 0.236,
+    "net_pnl": -569.15,
+    "return_pct": -5.69,
+    "max_drawdown_pct": 0.07
+   },
+   "fresh_high_pf": 0.607,
+   "fresh_yearly_pf": {
+    "2026": 0.669
+   },
+   "fresh_neighbourhood_pf": {
+    "10": 0.669,
+    "20": 0.594,
+    "40": 0.909
+   },
+   "fresh_status": "FAILED"
+  },
+  {
+   "instrument": "EUR/USD",
+   "timeframe": "h4",
+   "family": "sma_crossover",
+   "primary_param": "(10, 50)",
+   "stage1_gate_status": "ROBUSTNESS_REQUIRED",
+   "stage1_oos_pf": 1.011,
+   "fresh_base": {
+    "trades": 25,
+    "profit_factor": 0.935,
+    "win_rate": 0.32,
+    "net_pnl": -46.18,
+    "return_pct": -0.46,
+    "max_drawdown_pct": 0.04
+   },
+   "fresh_high_pf": 0.905,
+   "fresh_yearly_pf": {
+    "2026": 0.935
+   },
+   "fresh_neighbourhood_pf": {
+    "(10, 50)": 0.935,
+    "(5, 20)": 0.646,
+    "(20, 100)": 0.297
+   },
+   "fresh_status": "TOO_FEW_TRADES"
+  },
+  {
+   "instrument": "EUR/USD",
+   "timeframe": "d1",
+   "family": "breakout",
+   "primary_param": "20",
+   "stage1_gate_status": "REJECT_EARLY",
+   "stage1_oos_pf": 0.625,
+   "fresh_base": {
+    "trades": 10,
+    "profit_factor": 0.766,
+    "win_rate": 0.4,
+    "net_pnl": -140.71,
+    "return_pct": -1.41,
+    "max_drawdown_pct": 0.06
+   },
+   "fresh_high_pf": 0.75,
+   "fresh_yearly_pf": {
+    "2025": 0.0,
+    "2026": 1.081
+   },
+   "fresh_neighbourhood_pf": {
+    "20": 0.766,
+    "30": 0.163,
+    "40": 0.0,
+    "55": 0.0
+   },
+   "fresh_status": "TOO_FEW_TRADES"
+  },
+  {
+   "instrument": "EUR/USD",
+   "timeframe": "d1",
+   "family": "momentum",
+   "primary_param": "10",
+   "stage1_gate_status": "REJECT_EARLY",
+   "stage1_oos_pf": 0.988,
+   "fresh_base": {
+    "trades": 36,
+    "profit_factor": 0.828,
+    "win_rate": 0.333,
+    "net_pnl": -249.79,
+    "return_pct": -2.5,
+    "max_drawdown_pct": 0.06
+   },
+   "fresh_high_pf": 0.797,
+   "fresh_yearly_pf": {
+    "2025": 0.657,
+    "2026": 0.861
+   },
+   "fresh_neighbourhood_pf": {
+    "10": 0.828,
+    "20": 2.146,
+    "40": 0.519
+   },
+   "fresh_status": "FAILED"
+  },
+  {
+   "instrument": "EUR/USD",
+   "timeframe": "d1",
+   "family": "sma_crossover",
+   "primary_param": "(10, 50)",
+   "stage1_gate_status": "RESEARCH",
+   "stage1_oos_pf": 0.388,
+   "fresh_base": {
+    "trades": 8,
+    "profit_factor": 0.468,
+    "win_rate": 0.25,
+    "net_pnl": -356.84,
+    "return_pct": -3.57,
+    "max_drawdown_pct": 0.07
+   },
+   "fresh_high_pf": 0.46,
+   "fresh_yearly_pf": {
+    "2025": 0.0,
+    "2026": 0.481
+   },
+   "fresh_neighbourhood_pf": {
+    "(10, 50)": 0.468,
+    "(5, 20)": 1.396,
+    "(20, 100)": 0.631
+   },
+   "fresh_status": "TOO_FEW_TRADES"
+  },
+  {
+   "instrument": "GBP/USD",
+   "timeframe": "m15",
+   "family": "breakout",
+   "primary_param": "40",
+   "stage1_gate_status": "REJECT_EARLY",
+   "stage1_oos_pf": 0.855,
+   "fresh_base": {
+    "trades": 209,
+    "profit_factor": 0.783,
+    "win_rate": 0.311,
+    "net_pnl": -433.45,
+    "return_pct": -4.33,
+    "max_drawdown_pct": 0.06
+   },
+   "fresh_high_pf": 0.7,
+   "fresh_yearly_pf": {
+    "2025": 1.251,
+    "2026": 0.671
+   },
+   "fresh_neighbourhood_pf": {
+    "20": 0.768,
+    "30": 0.856,
+    "40": 0.783,
+    "55": 0.955
+   },
+   "fresh_status": "FAILED"
+  },
+  {
+   "instrument": "GBP/USD",
+   "timeframe": "m15",
+   "family": "momentum",
+   "primary_param": "40",
+   "stage1_gate_status": "REJECT_EARLY",
+   "stage1_oos_pf": 0.657,
+   "fresh_base": {
+    "trades": 477,
+    "profit_factor": 0.66,
+    "win_rate": 0.258,
+    "net_pnl": -891.54,
+    "return_pct": -8.92,
+    "max_drawdown_pct": 0.1
+   },
+   "fresh_high_pf": 0.496,
+   "fresh_yearly_pf": {
+    "2025": 1.036,
+    "2026": 0.592
+   },
+   "fresh_neighbourhood_pf": {
+    "10": 0.518,
+    "20": 0.633,
+    "40": 0.66
+   },
+   "fresh_status": "FAILED"
+  },
+  {
+   "instrument": "GBP/USD",
+   "timeframe": "m15",
+   "family": "sma_crossover",
+   "primary_param": "(10, 50)",
+   "stage1_gate_status": "REJECT_EARLY",
+   "stage1_oos_pf": 0.815,
+   "fresh_base": {
+    "trades": 172,
+    "profit_factor": 0.689,
+    "win_rate": 0.297,
+    "net_pnl": -456.5,
+    "return_pct": -4.56,
+    "max_drawdown_pct": 0.06
+   },
+   "fresh_high_pf": 0.595,
+   "fresh_yearly_pf": {
+    "2025": 1.442,
+    "2026": 0.576
+   },
+   "fresh_neighbourhood_pf": {
+    "(10, 50)": 0.689,
+    "(5, 20)": 0.666,
+    "(20, 100)": 0.709
+   },
+   "fresh_status": "FAILED"
+  },
+  {
+   "instrument": "GBP/USD",
+   "timeframe": "h1",
+   "family": "breakout",
+   "primary_param": "40",
+   "stage1_gate_status": "ROBUSTNESS_REQUIRED",
+   "stage1_oos_pf": 1.005,
+   "fresh_base": {
+    "trades": 46,
+    "profit_factor": 0.705,
+    "win_rate": 0.304,
+    "net_pnl": -269.49,
+    "return_pct": -2.69,
+    "max_drawdown_pct": 0.05
+   },
+   "fresh_high_pf": 0.666,
+   "fresh_yearly_pf": {
+    "2026": 0.705
+   },
+   "fresh_neighbourhood_pf": {
+    "20": 0.73,
+    "30": 0.751,
+    "40": 0.705,
+    "55": 0.795
+   },
+   "fresh_status": "FAILED"
+  },
+  {
+   "instrument": "GBP/USD",
+   "timeframe": "h1",
+   "family": "momentum",
+   "primary_param": "40",
+   "stage1_gate_status": "REJECT_EARLY",
+   "stage1_oos_pf": 0.933,
+   "fresh_base": {
+    "trades": 149,
+    "profit_factor": 0.601,
+    "win_rate": 0.262,
+    "net_pnl": -632.24,
+    "return_pct": -6.32,
+    "max_drawdown_pct": 0.07
+   },
+   "fresh_high_pf": 0.513,
+   "fresh_yearly_pf": {
+    "2026": 0.601
+   },
+   "fresh_neighbourhood_pf": {
+    "10": 0.537,
+    "20": 0.744,
+    "40": 0.601
+   },
+   "fresh_status": "FAILED"
+  },
+  {
+   "instrument": "GBP/USD",
+   "timeframe": "h1",
+   "family": "sma_crossover",
+   "primary_param": "(10, 50)",
+   "stage1_gate_status": "CLOSED",
+   "stage1_oos_pf": 0.953,
+   "fresh_base": {
+    "trades": 49,
+    "profit_factor": 0.68,
+    "win_rate": 0.327,
+    "net_pnl": -266.39,
+    "return_pct": -2.66,
+    "max_drawdown_pct": 0.04
+   },
+   "fresh_high_pf": 0.629,
+   "fresh_yearly_pf": {
+    "2026": 0.68
+   },
+   "fresh_neighbourhood_pf": {
+    "(10, 50)": 0.68,
+    "(5, 20)": 0.538,
+    "(20, 100)": 0.386
+   },
+   "fresh_status": "FAILED"
+  },
+  {
+   "instrument": "GBP/USD",
+   "timeframe": "h4",
+   "family": "breakout",
+   "primary_param": "20",
+   "stage1_gate_status": "CLOSED",
+   "stage1_oos_pf": 0.706,
+   "fresh_base": {
+    "trades": 29,
+    "profit_factor": 1.404,
+    "win_rate": 0.414,
+    "net_pnl": 365.17,
+    "return_pct": 3.65,
+    "max_drawdown_pct": 0.03
+   },
+   "fresh_high_pf": 1.367,
+   "fresh_yearly_pf": {
+    "2026": 1.404
+   },
+   "fresh_neighbourhood_pf": {
+    "20": 1.404,
+    "30": 0.939,
+    "40": 1.127,
+    "55": 1.325
+   },
+   "fresh_status": "TOO_FEW_TRADES"
+  },
+  {
+   "instrument": "GBP/USD",
+   "timeframe": "h4",
+   "family": "momentum",
+   "primary_param": "20",
+   "stage1_gate_status": "REJECT_EARLY",
+   "stage1_oos_pf": 0.603,
+   "fresh_base": {
+    "trades": 72,
+    "profit_factor": 0.704,
+    "win_rate": 0.333,
+    "net_pnl": -434.98,
+    "return_pct": -4.35,
+    "max_drawdown_pct": 0.08
+   },
+   "fresh_high_pf": 0.647,
+   "fresh_yearly_pf": {
+    "2026": 0.704
+   },
+   "fresh_neighbourhood_pf": {
+    "10": 0.76,
+    "20": 0.704,
+    "40": 1.361
+   },
+   "fresh_status": "FAILED"
+  },
+  {
+   "instrument": "GBP/USD",
+   "timeframe": "h4",
+   "family": "sma_crossover",
+   "primary_param": "(10, 50)",
+   "stage1_gate_status": "CLOSED",
+   "stage1_oos_pf": 0.774,
+   "fresh_base": {
+    "trades": 21,
+    "profit_factor": 1.656,
+    "win_rate": 0.429,
+    "net_pnl": 382.69,
+    "return_pct": 3.83,
+    "max_drawdown_pct": 0.03
+   },
+   "fresh_high_pf": 1.609,
+   "fresh_yearly_pf": {
+    "2026": 1.656
+   },
+   "fresh_neighbourhood_pf": {
+    "(10, 50)": 1.656,
+    "(5, 20)": 1.106,
+    "(20, 100)": 3.282
+   },
+   "fresh_status": "TOO_FEW_TRADES"
+  },
+  {
+   "instrument": "GBP/USD",
+   "timeframe": "d1",
+   "family": "breakout",
+   "primary_param": "55",
+   "stage1_gate_status": "RESEARCH",
+   "stage1_oos_pf": 0.606,
+   "fresh_base": {
+    "trades": 6,
+    "profit_factor": 0.0,
+    "win_rate": 0.0,
+    "net_pnl": -764.37,
+    "return_pct": -7.64,
+    "max_drawdown_pct": 0.08
+   },
+   "fresh_high_pf": 0.0,
+   "fresh_yearly_pf": {
+    "2025": 0.0,
+    "2026": 0.0
+   },
+   "fresh_neighbourhood_pf": {
+    "20": 0.451,
+    "30": 0.345,
+    "40": 0.28,
+    "55": 0.0
+   },
+   "fresh_status": "TOO_FEW_TRADES"
+  },
+  {
+   "instrument": "GBP/USD",
+   "timeframe": "d1",
+   "family": "momentum",
+   "primary_param": "20",
+   "stage1_gate_status": "REJECT_EARLY",
+   "stage1_oos_pf": 0.888,
+   "fresh_base": {
+    "trades": 21,
+    "profit_factor": 1.329,
+    "win_rate": 0.476,
+    "net_pnl": 261.93,
+    "return_pct": 2.62,
+    "max_drawdown_pct": 0.06
+   },
+   "fresh_high_pf": 1.282,
+   "fresh_yearly_pf": {
+    "2025": null,
+    "2026": 0.679
+   },
+   "fresh_neighbourhood_pf": {
+    "10": 0.859,
+    "20": 1.329,
+    "40": 0.227
+   },
+   "fresh_status": "TOO_FEW_TRADES"
+  },
+  {
+   "instrument": "GBP/USD",
+   "timeframe": "d1",
+   "family": "sma_crossover",
+   "primary_param": "(10, 50)",
+   "stage1_gate_status": "RESEARCH",
+   "stage1_oos_pf": 0.177,
+   "fresh_base": {
+    "trades": 6,
+    "profit_factor": 1.905,
+    "win_rate": 0.5,
+    "net_pnl": 321.32,
+    "return_pct": 3.21,
+    "max_drawdown_pct": 0.05
+   },
+   "fresh_high_pf": 1.875,
+   "fresh_yearly_pf": {
+    "2025": null,
+    "2026": 1.188
+   },
+   "fresh_neighbourhood_pf": {
+    "(10, 50)": 1.905,
+    "(5, 20)": 0.827,
+    "(20, 100)": 0.523
+   },
+   "fresh_status": "TOO_FEW_TRADES"
+  },
+  {
+   "instrument": "USD/JPY",
+   "timeframe": "m15",
+   "family": "breakout",
+   "primary_param": "55",
+   "stage1_gate_status": "REJECT_EARLY",
+   "stage1_oos_pf": 0.95,
+   "fresh_base": {
+    "trades": 155,
+    "profit_factor": 0.991,
+    "win_rate": 0.335,
+    "net_pnl": -14.37,
+    "return_pct": -0.14,
+    "max_drawdown_pct": 0.03
+   },
+   "fresh_high_pf": 0.923,
+   "fresh_yearly_pf": {
+    "2025": 1.141,
+    "2026": 0.94
+   },
+   "fresh_neighbourhood_pf": {
+    "20": 0.878,
+    "30": 0.983,
+    "40": 0.995,
+    "55": 0.991
+   },
+   "fresh_status": "FAILED"
+  },
+  {
+   "instrument": "USD/JPY",
+   "timeframe": "m15",
+   "family": "momentum",
+   "primary_param": "40",
+   "stage1_gate_status": "REJECT_EARLY",
+   "stage1_oos_pf": 0.606,
+   "fresh_base": {
+    "trades": 469,
+    "profit_factor": 0.927,
+    "win_rate": 0.307,
+    "net_pnl": -168.81,
+    "return_pct": -1.69,
+    "max_drawdown_pct": 0.03
+   },
+   "fresh_high_pf": 0.735,
+   "fresh_yearly_pf": {
+    "2025": 1.032,
+    "2026": 0.891
+   },
+   "fresh_neighbourhood_pf": {
+    "10": 0.526,
+    "20": 0.72,
+    "40": 0.927
+   },
+   "fresh_status": "FAILED"
+  },
+  {
+   "instrument": "USD/JPY",
+   "timeframe": "m15",
+   "family": "sma_crossover",
+   "primary_param": "(10, 50)",
+   "stage1_gate_status": "REJECT_EARLY",
+   "stage1_oos_pf": 0.853,
+   "fresh_base": {
+    "trades": 178,
+    "profit_factor": 0.931,
+    "win_rate": 0.309,
+    "net_pnl": -104.71,
+    "return_pct": -1.05,
+    "max_drawdown_pct": 0.02
+   },
+   "fresh_high_pf": 0.842,
+   "fresh_yearly_pf": {
+    "2025": 0.918,
+    "2026": 0.935
+   },
+   "fresh_neighbourhood_pf": {
+    "(10, 50)": 0.931,
+    "(5, 20)": 0.807,
+    "(20, 100)": 1.383
+   },
+   "fresh_status": "FAILED"
+  },
+  {
+   "instrument": "USD/JPY",
+   "timeframe": "h1",
+   "family": "breakout",
+   "primary_param": "55",
+   "stage1_gate_status": "PROMISING",
+   "stage1_oos_pf": 1.069,
+   "fresh_base": {
+    "trades": 47,
+    "profit_factor": 1.218,
+    "win_rate": 0.383,
+    "net_pnl": 223.08,
+    "return_pct": 2.23,
+    "max_drawdown_pct": 0.03
+   },
+   "fresh_high_pf": 1.18,
+   "fresh_yearly_pf": {
+    "2026": 1.218
+   },
+   "fresh_neighbourhood_pf": {
+    "20": 1.136,
+    "30": 1.277,
+    "40": 1.074,
+    "55": 1.218
+   },
+   "fresh_status": "CONFIRMED"
+  },
+  {
+   "instrument": "USD/JPY",
+   "timeframe": "h1",
+   "family": "momentum",
+   "primary_param": "20",
+   "stage1_gate_status": "REJECT_EARLY",
+   "stage1_oos_pf": 0.772,
+   "fresh_base": {
+    "trades": 199,
+    "profit_factor": 0.96,
+    "win_rate": 0.312,
+    "net_pnl": -83.34,
+    "return_pct": -0.83,
+    "max_drawdown_pct": 0.05
+   },
+   "fresh_high_pf": 0.854,
+   "fresh_yearly_pf": {
+    "2026": 0.96
+   },
+   "fresh_neighbourhood_pf": {
+    "10": 0.866,
+    "20": 0.96,
+    "40": 1.009
+   },
+   "fresh_status": "FAILED"
+  },
+  {
+   "instrument": "USD/JPY",
+   "timeframe": "h1",
+   "family": "sma_crossover",
+   "primary_param": "(10, 50)",
+   "stage1_gate_status": "ROBUSTNESS_REQUIRED",
+   "stage1_oos_pf": 1.203,
+   "fresh_base": {
+    "trades": 39,
+    "profit_factor": 0.665,
+    "win_rate": 0.256,
+    "net_pnl": -300.75,
+    "return_pct": -3.01,
+    "max_drawdown_pct": 0.04
+   },
+   "fresh_high_pf": 0.641,
+   "fresh_yearly_pf": {
+    "2026": 0.665
+   },
+   "fresh_neighbourhood_pf": {
+    "(10, 50)": 0.665,
+    "(5, 20)": 1.058,
+    "(20, 100)": 1.762
+   },
+   "fresh_status": "FAILED"
+  },
+  {
+   "instrument": "USD/JPY",
+   "timeframe": "h4",
+   "family": "breakout",
+   "primary_param": "20",
+   "stage1_gate_status": "REJECT_EARLY",
+   "stage1_oos_pf": 0.908,
+   "fresh_base": {
+    "trades": 37,
+    "profit_factor": 0.697,
+    "win_rate": 0.243,
+    "net_pnl": -399.11,
+    "return_pct": -3.99,
+    "max_drawdown_pct": 0.08
+   },
+   "fresh_high_pf": 0.68,
+   "fresh_yearly_pf": {
+    "2026": 0.697
+   },
+   "fresh_neighbourhood_pf": {
+    "20": 0.697,
+    "30": 1.048,
+    "40": 0.813,
+    "55": 0.786
+   },
+   "fresh_status": "FAILED"
+  },
+  {
+   "instrument": "USD/JPY",
+   "timeframe": "h4",
+   "family": "momentum",
+   "primary_param": "20",
+   "stage1_gate_status": "REJECT_EARLY",
+   "stage1_oos_pf": 0.721,
+   "fresh_base": {
+    "trades": 81,
+    "profit_factor": 0.902,
+    "win_rate": 0.358,
+    "net_pnl": -151.73,
+    "return_pct": -1.52,
+    "max_drawdown_pct": 0.06
+   },
+   "fresh_high_pf": 0.848,
+   "fresh_yearly_pf": {
+    "2026": 0.902
+   },
+   "fresh_neighbourhood_pf": {
+    "10": 0.78,
+    "20": 0.902,
+    "40": 1.333
+   },
+   "fresh_status": "FAILED"
+  },
+  {
+   "instrument": "USD/JPY",
+   "timeframe": "h4",
+   "family": "sma_crossover",
+   "primary_param": "(10, 50)",
+   "stage1_gate_status": "REJECT_EARLY",
+   "stage1_oos_pf": 0.67,
+   "fresh_base": {
+    "trades": 26,
+    "profit_factor": 0.813,
+    "win_rate": 0.308,
+    "net_pnl": -154.74,
+    "return_pct": -1.55,
+    "max_drawdown_pct": 0.06
+   },
+   "fresh_high_pf": 0.789,
+   "fresh_yearly_pf": {
+    "2026": 0.813
+   },
+   "fresh_neighbourhood_pf": {
+    "(10, 50)": 0.813,
+    "(5, 20)": 0.671,
+    "(20, 100)": 1.088
+   },
+   "fresh_status": "TOO_FEW_TRADES"
+  },
+  {
+   "instrument": "USD/JPY",
+   "timeframe": "d1",
+   "family": "breakout",
+   "primary_param": "55",
+   "stage1_gate_status": "RESEARCH",
+   "stage1_oos_pf": 0.901,
+   "fresh_base": {
+    "trades": 7,
+    "profit_factor": 0.196,
+    "win_rate": 0.143,
+    "net_pnl": -799.88,
+    "return_pct": -8.0,
+    "max_drawdown_pct": 0.08
+   },
+   "fresh_high_pf": 0.194,
+   "fresh_yearly_pf": {
+    "2026": 0.196
+   },
+   "fresh_neighbourhood_pf": {
+    "20": 0.937,
+    "30": 0.863,
+    "40": 0.195,
+    "55": 0.196
+   },
+   "fresh_status": "TOO_FEW_TRADES"
+  },
+  {
+   "instrument": "USD/JPY",
+   "timeframe": "d1",
+   "family": "momentum",
+   "primary_param": "20",
+   "stage1_gate_status": "CLOSED",
+   "stage1_oos_pf": 0.484,
+   "fresh_base": {
+    "trades": 28,
+    "profit_factor": 0.921,
+    "win_rate": 0.357,
+    "net_pnl": -113.34,
+    "return_pct": -1.13,
+    "max_drawdown_pct": 0.08
+   },
+   "fresh_high_pf": 0.898,
+   "fresh_yearly_pf": {
+    "2025": 0.186,
+    "2026": 1.416
+   },
+   "fresh_neighbourhood_pf": {
+    "10": 0.708,
+    "20": 0.921,
+    "40": 0.265
+   },
+   "fresh_status": "TOO_FEW_TRADES"
+  },
+  {
+   "instrument": "USD/JPY",
+   "timeframe": "d1",
+   "family": "sma_crossover",
+   "primary_param": "(10, 50)",
+   "stage1_gate_status": "REJECT_EARLY",
+   "stage1_oos_pf": 0.805,
+   "fresh_base": {
+    "trades": 5,
+    "profit_factor": 0.394,
+    "win_rate": 0.2,
+    "net_pnl": -367.42,
+    "return_pct": -3.67,
+    "max_drawdown_pct": 0.05
+   },
+   "fresh_high_pf": 0.39,
+   "fresh_yearly_pf": {
+    "2026": 0.394
+   },
+   "fresh_neighbourhood_pf": {
+    "(10, 50)": 0.394,
+    "(5, 20)": 0.318,
+    "(20, 100)": 0.825
+   },
+   "fresh_status": "TOO_FEW_TRADES"
+  },
+  {
+   "instrument": "XAU/USD",
+   "timeframe": "m15",
+   "family": "breakout",
+   "primary_param": "40",
+   "stage1_gate_status": "REJECT_EARLY",
+   "stage1_oos_pf": 0.88,
+   "fresh_base": {
+    "trades": 173,
+    "profit_factor": 1.241,
+    "win_rate": 0.399,
+    "net_pnl": 1419.88,
+    "return_pct": 14.2,
+    "max_drawdown_pct": 0.11
+   },
+   "fresh_high_pf": 1.224,
+   "fresh_yearly_pf": {
+    "2025": 0.512,
+    "2026": 1.434
+   },
+   "fresh_neighbourhood_pf": {
+    "20": 1.088,
+    "30": 1.282,
+    "40": 1.241,
+    "55": 1.345
+   },
+   "fresh_status": "CONFIRMED"
+  },
+  {
+   "instrument": "XAU/USD",
+   "timeframe": "m15",
+   "family": "momentum",
+   "primary_param": "40",
+   "stage1_gate_status": "REJECT_EARLY",
+   "stage1_oos_pf": 0.641,
+   "fresh_base": {
+    "trades": 408,
+    "profit_factor": 0.906,
+    "win_rate": 0.321,
+    "net_pnl": -733.57,
+    "return_pct": -7.34,
+    "max_drawdown_pct": 0.15
+   },
+   "fresh_high_pf": 0.871,
+   "fresh_yearly_pf": {
+    "2025": 0.614,
+    "2026": 0.996
+   },
+   "fresh_neighbourhood_pf": {
+    "10": 0.75,
+    "20": 0.752,
+    "40": 0.906
+   },
+   "fresh_status": "FAILED"
+  },
+  {
+   "instrument": "XAU/USD",
+   "timeframe": "m15",
+   "family": "sma_crossover",
+   "primary_param": "(10, 50)",
+   "stage1_gate_status": "REJECT_EARLY",
+   "stage1_oos_pf": 0.844,
+   "fresh_base": {
+    "trades": 150,
+    "profit_factor": 1.273,
+    "win_rate": 0.413,
+    "net_pnl": 1117.18,
+    "return_pct": 11.17,
+    "max_drawdown_pct": 0.06
+   },
+   "fresh_high_pf": 1.251,
+   "fresh_yearly_pf": {
+    "2025": 1.325,
+    "2026": 1.26
+   },
+   "fresh_neighbourhood_pf": {
+    "(10, 50)": 1.273,
+    "(5, 20)": 0.94,
+    "(20, 100)": 0.888
+   },
+   "fresh_status": "CONFIRMED"
+  },
+  {
+   "instrument": "XAU/USD",
+   "timeframe": "h1",
+   "family": "breakout",
+   "primary_param": "40",
+   "stage1_gate_status": "CLOSED",
+   "stage1_oos_pf": 0.971,
+   "fresh_base": {
+    "trades": 54,
+    "profit_factor": 0.665,
+    "win_rate": 0.278,
+    "net_pnl": -1546.04,
+    "return_pct": -15.46,
+    "max_drawdown_pct": 0.21
+   },
+   "fresh_high_pf": 0.66,
+   "fresh_yearly_pf": {
+    "2026": 0.665
+   },
+   "fresh_neighbourhood_pf": {
+    "20": 0.834,
+    "30": 0.685,
+    "40": 0.665,
+    "55": 0.711
+   },
+   "fresh_status": "FAILED"
+  },
+  {
+   "instrument": "XAU/USD",
+   "timeframe": "h1",
+   "family": "momentum",
+   "primary_param": "40",
+   "stage1_gate_status": "REJECT_EARLY",
+   "stage1_oos_pf": 0.767,
+   "fresh_base": {
+    "trades": 107,
+    "profit_factor": 0.844,
+    "win_rate": 0.308,
+    "net_pnl": -856.83,
+    "return_pct": -8.57,
+    "max_drawdown_pct": 0.14
+   },
+   "fresh_high_pf": 0.832,
+   "fresh_yearly_pf": {
+    "2026": 0.844
+   },
+   "fresh_neighbourhood_pf": {
+    "10": 0.94,
+    "20": 1.119,
+    "40": 0.844
+   },
+   "fresh_status": "FAILED"
+  },
+  {
+   "instrument": "XAU/USD",
+   "timeframe": "h1",
+   "family": "sma_crossover",
+   "primary_param": "(10, 50)",
+   "stage1_gate_status": "REJECT_EARLY",
+   "stage1_oos_pf": 0.995,
+   "fresh_base": {
+    "trades": 48,
+    "profit_factor": 1.284,
+    "win_rate": 0.458,
+    "net_pnl": 802.86,
+    "return_pct": 8.03,
+    "max_drawdown_pct": 0.13
+   },
+   "fresh_high_pf": 1.273,
+   "fresh_yearly_pf": {
+    "2026": 1.284
+   },
+   "fresh_neighbourhood_pf": {
+    "(10, 50)": 1.284,
+    "(5, 20)": 1.311,
+    "(20, 100)": 0.553
+   },
+   "fresh_status": "CONFIRMED"
+  },
+  {
+   "instrument": "XAU/USD",
+   "timeframe": "h4",
+   "family": "breakout",
+   "primary_param": "55",
+   "stage1_gate_status": "CLOSED",
+   "stage1_oos_pf": 0.767,
+   "fresh_base": {
+    "trades": 17,
+    "profit_factor": 0.632,
+    "win_rate": 0.294,
+    "net_pnl": -1020.03,
+    "return_pct": -10.2,
+    "max_drawdown_pct": 0.19
+   },
+   "fresh_high_pf": 0.63,
+   "fresh_yearly_pf": {
+    "2026": 0.632
+   },
+   "fresh_neighbourhood_pf": {
+    "20": 1.099,
+    "30": 1.132,
+    "40": 0.774,
+    "55": 0.632
+   },
+   "fresh_status": "TOO_FEW_TRADES"
+  },
+  {
+   "instrument": "XAU/USD",
+   "timeframe": "h4",
+   "family": "momentum",
+   "primary_param": "10",
+   "stage1_gate_status": "REJECT_EARLY",
+   "stage1_oos_pf": 0.969,
+   "fresh_base": {
+    "trades": 120,
+    "profit_factor": 1.084,
+    "win_rate": 0.367,
+    "net_pnl": 627.15,
+    "return_pct": 6.27,
+    "max_drawdown_pct": 0.11
+   },
+   "fresh_high_pf": 1.07,
+   "fresh_yearly_pf": {
+    "2026": 1.084
+   },
+   "fresh_neighbourhood_pf": {
+    "10": 1.084,
+    "20": 0.936,
+    "40": 0.792
+   },
+   "fresh_status": "CONFIRMED"
+  },
+  {
+   "instrument": "XAU/USD",
+   "timeframe": "h4",
+   "family": "sma_crossover",
+   "primary_param": "(10, 50)",
+   "stage1_gate_status": "ROBUSTNESS_REQUIRED",
+   "stage1_oos_pf": 1.376,
+   "fresh_base": {
+    "trades": 24,
+    "profit_factor": 1.526,
+    "win_rate": 0.375,
+    "net_pnl": 1209.26,
+    "return_pct": 12.09,
+    "max_drawdown_pct": 0.11
+   },
+   "fresh_high_pf": 1.519,
+   "fresh_yearly_pf": {
+    "2026": 1.526
+   },
+   "fresh_neighbourhood_pf": {
+    "(10, 50)": 1.526,
+    "(5, 20)": 0.858,
+    "(20, 100)": 0.814
+   },
+   "fresh_status": "TOO_FEW_TRADES"
+  },
+  {
+   "instrument": "XAU/USD",
+   "timeframe": "d1",
+   "family": "breakout",
+   "primary_param": "55",
+   "stage1_gate_status": "RESEARCH",
+   "stage1_oos_pf": 0.394,
+   "fresh_base": {
+    "trades": 7,
+    "profit_factor": 0.728,
+    "win_rate": 0.286,
+    "net_pnl": -704.01,
+    "return_pct": -7.04,
+    "max_drawdown_pct": 0.16
+   },
+   "fresh_high_pf": 0.727,
+   "fresh_yearly_pf": {
+    "2025": 0.0,
+    "2026": 1.064
+   },
+   "fresh_neighbourhood_pf": {
+    "20": 4.043,
+    "30": 4.691,
+    "40": 1.667,
+    "55": 0.728
+   },
+   "fresh_status": "TOO_FEW_TRADES"
+  },
+  {
+   "instrument": "XAU/USD",
+   "timeframe": "d1",
+   "family": "momentum",
+   "primary_param": "10",
+   "stage1_gate_status": "CLOSED",
+   "stage1_oos_pf": 0.792,
+   "fresh_base": {
+    "trades": 41,
+    "profit_factor": 1.076,
+    "win_rate": 0.293,
+    "net_pnl": 493.13,
+    "return_pct": 4.93,
+    "max_drawdown_pct": 0.21
+   },
+   "fresh_high_pf": 1.07,
+   "fresh_yearly_pf": {
+    "2025": 1.585,
+    "2026": 1.028
+   },
+   "fresh_neighbourhood_pf": {
+    "10": 1.076,
+    "20": 1.138,
+    "40": 7.655
+   },
+   "fresh_status": "CONFIRMED"
+  },
+  {
+   "instrument": "XAU/USD",
+   "timeframe": "d1",
+   "family": "sma_crossover",
+   "primary_param": "(10, 50)",
+   "stage1_gate_status": "RESEARCH",
+   "stage1_oos_pf": 0.698,
+   "fresh_base": {
+    "trades": 3,
+    "profit_factor": 0.231,
+    "win_rate": 0.333,
+    "net_pnl": -1135.51,
+    "return_pct": -11.36,
+    "max_drawdown_pct": 0.15
+   },
+   "fresh_high_pf": 0.231,
+   "fresh_yearly_pf": {
+    "2026": 0.231
+   },
+   "fresh_neighbourhood_pf": {
+    "(10, 50)": 0.231,
+    "(5, 20)": 0.86,
+    "(20, 100)": 3.03
+   },
+   "fresh_status": "TOO_FEW_TRADES"
+  }
+ ],
+ "m5_scan": [
+  {
+   "instrument": "EUR/USD",
+   "timeframe": "m5",
+   "candles": 23560,
+   "periods": {
+    "development": [
+     "2025-10-07T10:00:00+00:00",
+     "2026-06-01T02:05:00+00:00"
+    ],
+    "validation": [
+     "2026-06-01T02:10:00+00:00",
+     "2026-07-28T00:15:00+00:00"
+    ],
+    "out_of_sample": [
+     "2026-07-28T00:20:00+00:00",
+     "2026-09-29T04:05:00+00:00"
+    ]
+   },
+   "position_size": 10146.36754903013,
+   "families": {
+    "breakout": {
+     "primary_param": "55",
+     "development": {
+      "trades": 421,
+      "profit_factor": 0.648,
+      "win_rate": 0.29,
+      "net_pnl": -870.34,
+      "return_pct": -8.7,
+      "max_drawdown_pct": 0.09
+     },
+     "validation": {
+      "trades": 85,
+      "profit_factor": 1.066,
+      "win_rate": 0.388,
+      "net_pnl": 21.82,
+      "return_pct": 0.22,
+      "max_drawdown_pct": 0.01
+     },
+     "out_of_sample": {
+      "trades": 78,
+      "profit_factor": 0.585,
+      "win_rate": 0.269,
+      "net_pnl": -119.65,
+      "return_pct": -1.2,
+      "max_drawdown_pct": 0.01
+     },
+     "oos_cost_tiers_pf": {
+      "BASE": 0.585,
+      "LOW": 0.663,
+      "HIGH": 0.446
+     },
+     "neighbourhood_oos_pf": {
+      "20": 0.642,
+      "30": 0.604,
+      "40": 0.565,
+      "55": 0.585
+     },
+     "verdict": "REJECTED",
+     "gate_status": "REJECT_EARLY",
+     "gate_reason": "Verdict is REJECTED \u2014 development itself showed no edge (profit_factor <= 1.0). No further research effort is justified here.",
+     "scorecard_levels": {
+      "edge": "WEAK",
+      "robustness": "WEAK",
+      "risk": "STRONG",
+      "statistical": "MODERATE",
+      "realism": "WEAK"
+     },
+     "regime_evidence": {
+      "LOW_VOLATILITY": 526,
+      "TRENDING_DOWN": 12,
+      "RANGING": 31,
+      "TRENDING_UP": 13,
+      "HIGH_VOLATILITY": 2
+     }
+    },
+    "momentum": {
+     "primary_param": "10",
+     "development": {
+      "trades": 2441,
+      "profit_factor": 0.495,
+      "win_rate": 0.213,
+      "net_pnl": -3718.98,
+      "return_pct": -37.19,
+      "max_drawdown_pct": 0.37
+     },
+     "validation": {
+      "trades": 522,
+      "profit_factor": 0.449,
+      "win_rate": 0.195,
+      "net_pnl": -750.42,
+      "return_pct": -7.5,
+      "max_drawdown_pct": 0.08
+     },
+     "out_of_sample": {
+      "trades": 539,
+      "profit_factor": 0.335,
+      "win_rate": 0.186,
+      "net_pnl": -834.16,
+      "return_pct": -8.34,
+      "max_drawdown_pct": 0.09
+     },
+     "oos_cost_tiers_pf": {
+      "BASE": 0.335,
+      "LOW": 0.491,
+      "HIGH": 0.17
+     },
+     "neighbourhood_oos_pf": {
+      "10": 0.335,
+      "20": 0.385,
+      "40": 0.472
+     },
+     "verdict": "REJECTED",
+     "gate_status": "REJECT_EARLY",
+     "gate_reason": "Verdict is REJECTED \u2014 development itself showed no edge (profit_factor <= 1.0). No further research effort is justified here.",
+     "scorecard_levels": {
+      "edge": "WEAK",
+      "robustness": "WEAK",
+      "risk": "MODERATE",
+      "statistical": "MODERATE",
+      "realism": "WEAK"
+     },
+     "regime_evidence": {
+      "UNKNOWN": 21,
+      "LOW_VOLATILITY": 3248,
+      "TRENDING_UP": 74,
+      "RANGING": 105,
+      "TRENDING_DOWN": 50,
+      "HIGH_VOLATILITY": 4
+     }
+    },
+    "sma_crossover": {
+     "primary_param": "(10, 50)",
+     "development": {
+      "trades": 453,
+      "profit_factor": 0.774,
+      "win_rate": 0.3,
+      "net_pnl": -463.62,
+      "return_pct": -4.64,
+      "max_drawdown_pct": 0.05
+     },
+     "validation": {
+      "trades": 85,
+      "profit_factor": 0.686,
+      "win_rate": 0.306,
+      "net_pnl": -100.4,
+      "return_pct": -1.0,
+      "max_drawdown_pct": 0.01
+     },
+     "out_of_sample": {
+      "trades": 98,
+      "profit_factor": 0.658,
+      "win_rate": 0.296,
+      "net_pnl": -99.01,
+      "return_pct": -0.99,
+      "max_drawdown_pct": 0.01
+     },
+     "oos_cost_tiers_pf": {
+      "BASE": 0.658,
+      "LOW": 0.791,
+      "HIGH": 0.448
+     },
+     "neighbourhood_oos_pf": {
+      "(10, 50)": 0.658,
+      "(5, 20)": 0.562,
+      "(20, 100)": 0.881
+     },
+     "verdict": "REJECTED",
+     "gate_status": "REJECT_EARLY",
+     "gate_reason": "Verdict is REJECTED \u2014 development itself showed no edge (profit_factor <= 1.0). No further research effort is justified here.",
+     "scorecard_levels": {
+      "edge": "WEAK",
+      "robustness": "WEAK",
+      "risk": "STRONG",
+      "statistical": "WEAK",
+      "realism": "WEAK"
+     },
+     "regime_evidence": {
+      "LOW_VOLATILITY": 593,
+      "RANGING": 42,
+      "HIGH_VOLATILITY": 1
+     }
+    }
+   },
+   "seconds": 2.3,
+   "candidate_configs": []
+  },
+  {
+   "instrument": "GBP/USD",
+   "timeframe": "m5",
+   "candles": 23561,
+   "periods": {
+    "development": [
+     "2025-10-07T10:00:00+00:00",
+     "2026-06-01T02:05:00+00:00"
+    ],
+    "validation": [
+     "2026-06-01T02:10:00+00:00",
+     "2026-07-28T00:15:00+00:00"
+    ],
+    "out_of_sample": [
+     "2026-07-28T00:20:00+00:00",
+     "2026-09-29T04:05:00+00:00"
+    ]
+   },
+   "position_size": 8799.322962981625,
+   "families": {
+    "breakout": {
+     "primary_param": "55",
+     "development": {
+      "trades": 412,
+      "profit_factor": 0.808,
+      "win_rate": 0.318,
+      "net_pnl": -489.46,
+      "return_pct": -4.89,
+      "max_drawdown_pct": 0.06
+     },
+     "validation": {
+      "trades": 79,
+      "profit_factor": 1.126,
+      "win_rate": 0.405,
+      "net_pnl": 46.88,
+      "return_pct": 0.47,
+      "max_drawdown_pct": 0.01
+     },
+     "out_of_sample": {
+      "trades": 76,
+      "profit_factor": 0.427,
+      "win_rate": 0.224,
+      "net_pnl": -205.72,
+      "return_pct": -2.06,
+      "max_drawdown_pct": 0.02
+     },
+     "oos_cost_tiers_pf": {
+      "BASE": 0.427,
+      "LOW": 0.494,
+      "HIGH": 0.326
+     },
+     "neighbourhood_oos_pf": {
+      "20": 0.637,
+      "30": 0.521,
+      "40": 0.594,
+      "55": 0.427
+     },
+     "verdict": "REJECTED",
+     "gate_status": "REJECT_EARLY",
+     "gate_reason": "Verdict is REJECTED \u2014 development itself showed no edge (profit_factor <= 1.0). No further research effort is justified here.",
+     "scorecard_levels": {
+      "edge": "WEAK",
+      "robustness": "WEAK",
+      "risk": "MODERATE",
+      "statistical": "MODERATE",
+      "realism": "WEAK"
+     },
+     "regime_evidence": {
+      "LOW_VOLATILITY": 476,
+      "RANGING": 55,
+      "TRENDING_DOWN": 18,
+      "TRENDING_UP": 16,
+      "HIGH_VOLATILITY": 2
+     }
+    },
+    "momentum": {
+     "primary_param": "40",
+     "development": {
+      "trades": 1190,
+      "profit_factor": 0.527,
+      "win_rate": 0.211,
+      "net_pnl": -2271.13,
+      "return_pct": -22.71,
+      "max_drawdown_pct": 0.23
+     },
+     "validation": {
+      "trades": 245,
+      "profit_factor": 0.568,
+      "win_rate": 0.216,
+      "net_pnl": -325.05,
+      "return_pct": -3.25,
+      "max_drawdown_pct": 0.03
+     },
+     "out_of_sample": {
+      "trades": 264,
+      "profit_factor": 0.325,
+      "win_rate": 0.167,
+      "net_pnl": -561.04,
+      "return_pct": -5.61,
+      "max_drawdown_pct": 0.06
+     },
+     "oos_cost_tiers_pf": {
+      "BASE": 0.325,
+      "LOW": 0.464,
+      "HIGH": 0.192
+     },
+     "neighbourhood_oos_pf": {
+      "10": 0.336,
+      "20": 0.35,
+      "40": 0.325
+     },
+     "verdict": "REJECTED",
+     "gate_status": "REJECT_EARLY",
+     "gate_reason": "Verdict is REJECTED \u2014 development itself showed no edge (profit_factor <= 1.0). No further research effort is justified here.",
+     "scorecard_levels": {
+      "edge": "WEAK",
+      "robustness": "WEAK",
+      "risk": "STRONG",
+      "statistical": "MODERATE",
+      "realism": "WEAK"
+     },
+     "regime_evidence": {
+      "UNKNOWN": 6,
+      "LOW_VOLATILITY": 1538,
+      "RANGING": 151,
+      "TRENDING_DOWN": 4
+     }
+    },
+    "sma_crossover": {
+     "primary_param": "(10, 50)",
+     "development": {
+      "trades": 464,
+      "profit_factor": 0.754,
+      "win_rate": 0.297,
+      "net_pnl": -611.16,
+      "return_pct": -6.11,
+      "max_drawdown_pct": 0.07
+     },
+     "validation": {
+      "trades": 113,
+      "profit_factor": 0.739,
+      "win_rate": 0.274,
+      "net_pnl": -113.47,
+      "return_pct": -1.13,
+      "max_drawdown_pct": 0.02
+     },
+     "out_of_sample": {
+      "trades": 99,
+      "profit_factor": 0.783,
+      "win_rate": 0.354,
+      "net_pnl": -70.01,
+      "return_pct": -0.7,
+      "max_drawdown_pct": 0.01
+     },
+     "oos_cost_tiers_pf": {
+      "BASE": 0.783,
+      "LOW": 0.968,
+      "HIGH": 0.535
+     },
+     "neighbourhood_oos_pf": {
+      "(10, 50)": 0.783,
+      "(5, 20)": 0.564,
+      "(20, 100)": 0.545
+     },
+     "verdict": "REJECTED",
+     "gate_status": "REJECT_EARLY",
+     "gate_reason": "Verdict is REJECTED \u2014 development itself showed no edge (profit_factor <= 1.0). No further research effort is justified here.",
+     "scorecard_levels": {
+      "edge": "WEAK",
+      "robustness": "WEAK",
+      "risk": "MODERATE",
+      "statistical": "WEAK",
+      "realism": "WEAK"
+     },
+     "regime_evidence": {
+      "LOW_VOLATILITY": 597,
+      "RANGING": 77,
+      "HIGH_VOLATILITY": 1,
+      "UNKNOWN": 1
+     }
+    }
+   },
+   "seconds": 1.7,
+   "candidate_configs": []
+  },
+  {
+   "instrument": "USD/JPY",
+   "timeframe": "m5",
+   "candles": 23561,
+   "periods": {
+    "development": [
+     "2025-10-07T10:00:00+00:00",
+     "2026-06-01T02:05:00+00:00"
+    ],
+    "validation": [
+     "2026-06-01T02:10:00+00:00",
+     "2026-07-28T00:20:00+00:00"
+    ],
+    "out_of_sample": [
+     "2026-07-28T00:25:00+00:00",
+     "2026-09-29T04:10:00+00:00"
+    ]
+   },
+   "position_size": 75.03656143702061,
+   "families": {
+    "breakout": {
+     "primary_param": "40",
+     "development": {
+      "trades": 489,
+      "profit_factor": 0.662,
+      "win_rate": 0.28,
+      "net_pnl": -1145.87,
+      "return_pct": -11.46,
+      "max_drawdown_pct": 0.12
+     },
+     "validation": {
+      "trades": 102,
+      "profit_factor": 0.661,
+      "win_rate": 0.275,
+      "net_pnl": -111.09,
+      "return_pct": -1.11,
+      "max_drawdown_pct": 0.01
+     },
+     "out_of_sample": {
+      "trades": 97,
+      "profit_factor": 1.057,
+      "win_rate": 0.371,
+      "net_pnl": 28.03,
+      "return_pct": 0.28,
+      "max_drawdown_pct": 0.01
+     },
+     "oos_cost_tiers_pf": {
+      "BASE": 1.057,
+      "LOW": 1.125,
+      "HIGH": 0.916
+     },
+     "neighbourhood_oos_pf": {
+      "20": 0.986,
+      "30": 0.973,
+      "40": 1.057,
+      "55": 1.091
+     },
+     "verdict": "REJECTED",
+     "gate_status": "REJECT_EARLY",
+     "gate_reason": "Verdict is REJECTED \u2014 development itself showed no edge (profit_factor <= 1.0). No further research effort is justified here.",
+     "scorecard_levels": {
+      "edge": "WEAK",
+      "robustness": "WEAK",
+      "risk": "STRONG",
+      "statistical": "WEAK",
+      "realism": "MODERATE"
+     },
+     "regime_evidence": {
+      "LOW_VOLATILITY": 584,
+      "TRENDING_UP": 13,
+      "RANGING": 59,
+      "TRENDING_DOWN": 26,
+      "HIGH_VOLATILITY": 5,
+      "UNKNOWN": 1
+     }
+    },
+    "momentum": {
+     "primary_param": "40",
+     "development": {
+      "trades": 1233,
+      "profit_factor": 0.599,
+      "win_rate": 0.227,
+      "net_pnl": -1898.85,
+      "return_pct": -18.99,
+      "max_drawdown_pct": 0.19
+     },
+     "validation": {
+      "trades": 269,
+      "profit_factor": 0.546,
+      "win_rate": 0.216,
+      "net_pnl": -237.1,
+      "return_pct": -2.37,
+      "max_drawdown_pct": 0.02
+     },
+     "out_of_sample": {
+      "trades": 258,
+      "profit_factor": 0.536,
+      "win_rate": 0.236,
+      "net_pnl": -376.5,
+      "return_pct": -3.76,
+      "max_drawdown_pct": 0.04
+     },
+     "oos_cost_tiers_pf": {
+      "BASE": 0.536,
+      "LOW": 0.65,
+      "HIGH": 0.362
+     },
+     "neighbourhood_oos_pf": {
+      "10": 0.563,
+      "20": 0.696,
+      "40": 0.536
+     },
+     "verdict": "REJECTED",
+     "gate_status": "REJECT_EARLY",
+     "gate_reason": "Verdict is REJECTED \u2014 development itself showed no edge (profit_factor <= 1.0). No further research effort is justified here.",
+     "scorecard_levels": {
+      "edge": "WEAK",
+      "robustness": "WEAK",
+      "risk": "STRONG",
+      "statistical": "MODERATE",
+      "realism": "WEAK"
+     },
+     "regime_evidence": {
+      "UNKNOWN": 7,
+      "LOW_VOLATILITY": 1569,
+      "RANGING": 174,
+      "TRENDING_UP": 2,
+      "HIGH_VOLATILITY": 4,
+      "TRENDING_DOWN": 4
+     }
+    },
+    "sma_crossover": {
+     "primary_param": "(10, 50)",
+     "development": {
+      "trades": 466,
+      "profit_factor": 0.832,
+      "win_rate": 0.307,
+      "net_pnl": -421.34,
+      "return_pct": -4.21,
+      "max_drawdown_pct": 0.05
+     },
+     "validation": {
+      "trades": 97,
+      "profit_factor": 0.622,
+      "win_rate": 0.268,
+      "net_pnl": -98.22,
+      "return_pct": -0.98,
+      "max_drawdown_pct": 0.01
+     },
+     "out_of_sample": {
+      "trades": 103,
+      "profit_factor": 0.712,
+      "win_rate": 0.32,
+      "net_pnl": -133.9,
+      "return_pct": -1.34,
+      "max_drawdown_pct": 0.02
+     },
+     "oos_cost_tiers_pf": {
+      "BASE": 0.712,
+      "LOW": 0.782,
+      "HIGH": 0.576
+     },
+     "neighbourhood_oos_pf": {
+      "(10, 50)": 0.712,
+      "(5, 20)": 0.608,
+      "(20, 100)": 1.113
+     },
+     "verdict": "REJECTED",
+     "gate_status": "REJECT_EARLY",
+     "gate_reason": "Verdict is REJECTED \u2014 development itself showed no edge (profit_factor <= 1.0). No further research effort is justified here.",
+     "scorecard_levels": {
+      "edge": "WEAK",
+      "robustness": "WEAK",
+      "risk": "STRONG",
+      "statistical": "WEAK",
+      "realism": "WEAK"
+     },
+     "regime_evidence": {
+      "LOW_VOLATILITY": 584,
+      "RANGING": 77,
+      "HIGH_VOLATILITY": 3,
+      "TRENDING_DOWN": 1,
+      "UNKNOWN": 1
+     }
+    }
+   },
+   "seconds": 1.7,
+   "candidate_configs": []
+  },
+  {
+   "instrument": "XAU/USD",
+   "timeframe": "m5",
+   "candles": 22637,
+   "periods": {
+    "development": [
+     "2025-10-07T10:00:00+00:00",
+     "2026-06-01T00:25:00+00:00"
+    ],
+    "validation": [
+     "2026-06-01T00:30:00+00:00",
+     "2026-07-27T20:30:00+00:00"
+    ],
+    "out_of_sample": [
+     "2026-07-27T20:35:00+00:00",
+     "2026-09-29T04:10:00+00:00"
+    ]
+   },
+   "position_size": 2.638483612455997,
+   "families": {
+    "breakout": {
+     "primary_param": "55",
+     "development": {
+      "trades": 372,
+      "profit_factor": 0.917,
+      "win_rate": 0.32,
+      "net_pnl": -786.67,
+      "return_pct": -7.87,
+      "max_drawdown_pct": 0.17
+     },
+     "validation": {
+      "trades": 79,
+      "profit_factor": 1.08,
+      "win_rate": 0.354,
+      "net_pnl": 114.5,
+      "return_pct": 1.14,
+      "max_drawdown_pct": 0.04
+     },
+     "out_of_sample": {
+      "trades": 87,
+      "profit_factor": 0.972,
+      "win_rate": 0.391,
+      "net_pnl": -37.8,
+      "return_pct": -0.38,
+      "max_drawdown_pct": 0.05
+     },
+     "oos_cost_tiers_pf": {
+      "BASE": 0.972,
+      "LOW": 0.991,
+      "HIGH": 0.941
+     },
+     "neighbourhood_oos_pf": {
+      "20": 1.132,
+      "30": 1.054,
+      "40": 1.193,
+      "55": 0.972
+     },
+     "verdict": "REJECTED",
+     "gate_status": "REJECT_EARLY",
+     "gate_reason": "Verdict is REJECTED \u2014 development itself showed no edge (profit_factor <= 1.0). No further research effort is justified here.",
+     "scorecard_levels": {
+      "edge": "WEAK",
+      "robustness": "WEAK",
+      "risk": "STRONG",
+      "statistical": "WEAK",
+      "realism": "WEAK"
+     },
+     "regime_evidence": {
+      "TRENDING_UP": 137,
+      "RANGING": 143,
+      "TRENDING_DOWN": 107,
+      "HIGH_VOLATILITY": 149,
+      "LOW_VOLATILITY": 2
+     }
+    },
+    "momentum": {
+     "primary_param": "20",
+     "development": {
+      "trades": 1790,
+      "profit_factor": 0.776,
+      "win_rate": 0.296,
+      "net_pnl": -4320.57,
+      "return_pct": -43.21,
+      "max_drawdown_pct": 0.45
+     },
+     "validation": {
+      "trades": 370,
+      "profit_factor": 1.018,
+      "win_rate": 0.346,
+      "net_pnl": 48.34,
+      "return_pct": 0.48,
+      "max_drawdown_pct": 0.06
+     },
+     "out_of_sample": {
+      "trades": 291,
+      "profit_factor": 1.022,
+      "win_rate": 0.347,
+      "net_pnl": 49.74,
+      "return_pct": 0.5,
+      "max_drawdown_pct": 0.04
+     },
+     "oos_cost_tiers_pf": {
+      "BASE": 1.022,
+      "LOW": 1.085,
+      "HIGH": 0.927
+     },
+     "neighbourhood_oos_pf": {
+      "10": 0.812,
+      "20": 1.022,
+      "40": 1.056
+     },
+     "verdict": "REJECTED",
+     "gate_status": "REJECT_EARLY",
+     "gate_reason": "Verdict is REJECTED \u2014 development itself showed no edge (profit_factor <= 1.0). No further research effort is justified here.",
+     "scorecard_levels": {
+      "edge": "WEAK",
+      "robustness": "WEAK",
+      "risk": "STRONG",
+      "statistical": "WEAK",
+      "realism": "MODERATE"
+     },
+     "regime_evidence": {
+      "UNKNOWN": 3,
+      "TRENDING_UP": 362,
+      "RANGING": 1244,
+      "TRENDING_DOWN": 343,
+      "HIGH_VOLATILITY": 481,
+      "LOW_VOLATILITY": 18
+     }
+    },
+    "sma_crossover": {
+     "primary_param": "(10, 50)",
+     "development": {
+      "trades": 469,
+      "profit_factor": 0.824,
+      "win_rate": 0.29,
+      "net_pnl": -1620.52,
+      "return_pct": -16.21,
+      "max_drawdown_pct": 0.2
+     },
+     "validation": {
+      "trades": 101,
+      "profit_factor": 0.554,
+      "win_rate": 0.267,
+      "net_pnl": -698.31,
+      "return_pct": -6.98,
+      "max_drawdown_pct": 0.08
+     },
+     "out_of_sample": {
+      "trades": 99,
+      "profit_factor": 0.931,
+      "win_rate": 0.343,
+      "net_pnl": -92.19,
+      "return_pct": -0.92,
+      "max_drawdown_pct": 0.05
+     },
+     "oos_cost_tiers_pf": {
+      "BASE": 0.931,
+      "LOW": 0.956,
+      "HIGH": 0.89
+     },
+     "neighbourhood_oos_pf": {
+      "(10, 50)": 0.931,
+      "(5, 20)": 0.85,
+      "(20, 100)": 0.953
+     },
+     "verdict": "REJECTED",
+     "gate_status": "REJECT_EARLY",
+     "gate_reason": "Verdict is REJECTED \u2014 development itself showed no edge (profit_factor <= 1.0). No further research effort is justified here.",
+     "scorecard_levels": {
+      "edge": "WEAK",
+      "robustness": "WEAK",
+      "risk": "STRONG",
+      "statistical": "WEAK",
+      "realism": "WEAK"
+     },
+     "regime_evidence": {
+      "RANGING": 511,
+      "HIGH_VOLATILITY": 149,
+      "LOW_VOLATILITY": 9
+     }
+    }
+   },
+   "seconds": 1.7,
+   "candidate_configs": []
+  }
+ ]
+}
