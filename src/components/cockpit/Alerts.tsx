@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Bell, BellOff, BellRing, Loader2, Send } from 'lucide-react';
 import { useApi } from '../../lib/api';
-import { alertState, disableAlerts, enableAlerts, resyncAlerts, sendTestAlert, type AlertState } from '../../lib/push';
+import { alertState, disableAlerts, enableAlerts, resyncAlerts, sendTestAlert, showLocalTestNotification, type AlertState } from '../../lib/push';
 import { Chip, IconTile, Panel, timeLocal } from './common';
 
 // Tiny shared store so the top-bar bell and the dashboard card stay in sync.
@@ -56,12 +56,22 @@ export function useAlerts() {
     }
   }, []);
 
+  const localTest = useCallback(async () => {
+    setMessage(null);
+    try {
+      await showLocalTestNotification();
+      setMessage({ tone: 'good', text: 'Phone test shown. If nothing appeared, Android or Chrome is hiding Tembo notifications (see the checklist below).' });
+    } catch (e) {
+      setMessage({ tone: 'bad', text: (e as Error).message });
+    }
+  }, []);
+
   const test = useCallback(async () => {
     setBusy(true);
     setMessage(null);
     try {
       await sendTestAlert();
-      setMessage({ tone: 'good', text: 'Test sent. It should pop up in a few seconds.' });
+      setMessage({ tone: 'good', text: `Google's push service accepted the test at ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}. It should pop up within a few seconds.` });
     } catch (e) {
       setMessage({ tone: 'bad', text: (e as Error).message });
     } finally {
@@ -69,7 +79,7 @@ export function useAlerts() {
     }
   }, []);
 
-  return { state, busy, message, turnOn, turnOff, test };
+  return { state, busy, message, turnOn, turnOff, test, localTest };
 }
 
 /** Compact bell for the top bar. */
@@ -107,7 +117,7 @@ interface AlertStatus {
 
 /** Dashboard card: turn alerts on/off, send a test, see when the next checks run. */
 export function AlertsCard() {
-  const { state, busy, message, turnOn, turnOff, test } = useAlerts();
+  const { state, busy, message, turnOn, turnOff, test, localTest } = useAlerts();
   const status = useApi<AlertStatus>('/alerts/status', { refreshMs: 300_000 });
   const on = state === 'on';
 
@@ -119,7 +129,7 @@ export function AlertsCard() {
       bodyClass="px-3 pb-3 pt-2 sm:px-4"
     >
       <p className="text-[12px] leading-relaxed text-muted">
-        About <span className="font-semibold text-fg">5 minutes before</span> an hourly candle closes, Tembo checks if a signal is forming and sends a heads-up. When the candle closes it sends the confirmed signal, or says it didn't confirm.
+        About <span className="font-semibold text-fg">5 minutes before</span> an hourly candle closes, Tembo checks if a signal is forming and sends a heads-up. When the candle closes it sends the confirmed signal, or says it didn't confirm. <span className="text-fg">No signal forming means no alert</span>, so most hours are quiet.
       </p>
       {status.data && (
         <div className="mt-2 grid grid-cols-2 gap-2 text-[11px]">
@@ -160,7 +170,23 @@ export function AlertsCard() {
           )}
         </div>
       )}
+      {on && (
+        <button onClick={localTest} className="mt-2 w-full rounded-lg border border-line-2 px-3 py-2 text-[12px] text-muted hover:text-fg">
+          Show a test on this phone only (no internet)
+        </button>
+      )}
       {message && <div className={`mt-2 text-[11px] ${message.tone === 'good' ? 'text-up' : 'text-down'}`}>{message.text}</div>}
+      {on && (
+        <details className="mt-2 rounded-lg border border-line bg-panel-2 px-2.5 py-2 text-[11px] text-muted">
+          <summary className="cursor-pointer font-semibold text-fg">Not seeing notifications? (Android)</summary>
+          <ol className="mt-1.5 list-decimal space-y-1 pl-4 leading-relaxed">
+            <li>Android <b>Settings → Apps → Chrome → Notifications</b>: turn on, including <b>Sites</b>.</li>
+            <li>In Chrome: <b>⋮ → Settings → Notifications</b>: make sure <b>tembobot.ngaatendwew.workers.dev</b> is <b>Allowed</b>.</li>
+            <li><b>Settings → Apps → Chrome → Battery</b>: set to <b>Unrestricted</b>. On Tecno, Infinix, itel, Xiaomi or Samsung also allow <b>Auto-start / background activity</b>.</li>
+            <li>Turn off <b>Do Not Disturb</b> while testing.</li>
+          </ol>
+        </details>
+      )}
 
       {status.data?.recent?.length ? (
         <div className="mt-3 border-t border-line pt-2">

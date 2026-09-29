@@ -74,3 +74,16 @@ export async function resyncAlerts(): Promise<void> {
   const sub = await currentSubscription();
   if (sub) await apiPost('/alerts/subscribe', sub.toJSON()).catch(() => undefined);
 }
+
+/** Show a notification directly on this device (no server, no push service). */
+export async function showLocalTestNotification(): Promise<void> {
+  if (!pushSupported()) throw new Error('This browser cannot show notifications.');
+  if (Notification.permission !== 'granted') throw new Error('Notifications are not allowed for this site yet.');
+  const reg = await registration();
+  await reg.showNotification('Tembo phone test', {
+    body: 'If you can see this, your phone shows Tembo notifications.',
+    icon: '/icon-192.png',
+    badge: '/badge-72.png',
+    tag: 'tembo-local-test',
+  });
+}
