@@ -80,6 +80,7 @@ export interface ShadowResults {
   dollars_per_r: number;
   pass_rule: string;
   combined: ShadowScore;
+  tracker?: { started_at: string | null; heartbeat_at: string | null; last_loop_error: { at: string; where: string; error: string } | null };
   setups: ShadowSetup[];
   trades: ShadowTradeRow[];
 }
@@ -247,6 +248,8 @@ export default function Results() {
     .map((s) => s.tracking_since)
     .filter(Boolean)
     .sort()[0];
+  const beat = d?.tracker?.heartbeat_at ? Date.parse(d.tracker.heartbeat_at) : NaN;
+  const trackerLive = Number.isFinite(beat) && Date.now() - beat < 5 * 60_000;
 
   return (
     <div>
@@ -277,6 +280,12 @@ export default function Results() {
                 tone={rTone(c.net_r)}
                 sub={`${money(c.net_usd_at_50_per_r, { sign: true })} at $${d.dollars_per_r} a trade`}
               />
+            </div>
+            <div className="mt-3 flex items-center gap-1.5 border-t border-line pt-3 text-[11px] text-muted">
+              <span className={`h-1.5 w-1.5 rounded-full ${trackerLive ? 'bg-up' : 'bg-warn'}`} />
+              {trackerLive
+                ? `Tracker running · checked ${when(d.tracker?.heartbeat_at)}`
+                : 'Tracker paused: the server was asleep or restarting. It catches up on missed candles when it wakes.'}
             </div>
           </section>
 
