@@ -1,0 +1,31 @@
+name: Backend probe
+
+on:
+  push:
+    branches: [probe]
+
+permissions:
+  contents: write
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Read backend status
+        run: |
+          mkdir out
+          for p in shadow/results alerts/status health deriv/status; do
+            f=out/$(echo $p | tr / _).json
+            curl -sS -m 90 "https://tembo-forex-bot.onrender.com/$p" -o "$f" -w "\n$p %{http_code}\n" || echo "$p failed" >> out/errors.txt
+          done
+          date -u > out/at.txt
+      - name: Publish to probe-results
+        run: |
+          cd out
+          git init -q
+          git config user.name probe
+          git config user.email probe@users.noreply.github.com
+          git checkout -q -b probe-results
+          git add -A
+          git commit -qm "probe $(date -u +%FT%TZ)"
+          git push -qf "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" probe-results
