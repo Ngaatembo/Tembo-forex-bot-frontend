@@ -161,6 +161,7 @@ export function DerivDemo({
         </div>
       )}
       <DemoExecution connected={connected} decision={decision} instrument={instrument} timeframe={timeframe} onChange={reload} />
+      {connected && <ConnectionTest instrument={instrument} onDone={reload} />}
     </Panel>
   );
 }
@@ -181,7 +182,7 @@ function DemoExecution({
   const signal = signalOf(decision);
   const eligible = decision?.paper_eligibility?.eligible === true;
   const [stake, setStake] = useState('10');
-  const [multiplier, setMultiplier] = useState('100');
+  const [multiplier, setMultiplier] = useState('50');
   const [busy, setBusy] = useState<null | 'proposal' | 'buy' | 'sell'>(null);
   const [proposal, setProposal] = useState<(DerivProposal & { at: number }) | null>(null);
   const [msg, setMsg] = useState<{ tone: 'good' | 'bad'; text: string } | null>(null);
@@ -380,6 +381,89 @@ function ContractMonitor({ contractId, onClosed, onForget }: { contractId: numbe
         </button>
       </div>
       {msg && <div className="mt-1.5 break-words text-[11px] text-muted">{msg}</div>}
+    </div>
+  );
+}
+
+
+interface SelfTestResult {
+  status: 'PASSED' | 'PARTIAL' | 'FAILED';
+  instrument: string;
+  contract_id?: number;
+  steps: Array<{ step: string; ok: boolean; detail: string }>;
+}
+
+const TESTABLE = ['USD/JPY', 'EUR/USD', 'GBP/USD', 'XAU/USD'];
+
+/** One-tap check that the whole demo path works: $1 demo trade, opened and closed in seconds. */
+function ConnectionTest({ instrument, onDone }: { instrument: string; onDone: () => void }) {
+  const [busy, setBusy] = useState(false);
+  const [confirming, setConfirming] = useState(false);
+  const [result, setResult] = useState<SelfTestResult | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const target = TESTABLE.includes(instrument) ? instrument : 'USD/JPY';
+
+  async function run() {
+    setBusy(true);
+    setConfirming(false);
+    setError(null);
+    setResult(null);
+    try {
+      setResult(await apiPost<SelfTestResult>('/deriv/demo/selftest', { instrument: target }));
+      onDone();
+    } catch (e) {
+      setError((e as ApiError).message);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <div className="mt-3 border-t border-line pt-3">
+      <div className="flex items-center justify-between">
+        <div className="text-[11px] font-semibold text-fg">Connection test</div>
+        <span className="text-[9px] font-semibold uppercase tracking-wider text-faint">$1 demo · auto-closes</span>
+      </div>
+      <p className="mt-1 text-[11px] leading-relaxed text-faint">
+        Opens a $1 {metaFor(target).code} demo trade with stop loss and take profit, then closes it straight away. It checks the whole path works. It is not a Tembo signal.
+      </p>
+      {!confirming ? (
+        <button
+          onClick={() => setConfirming(true)}
+          disabled={busy}
+          className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-lg border border-info/40 bg-info-soft/60 px-3 py-2 text-[12px] font-semibold text-info disabled:opacity-60"
+        >
+          {busy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Radio className="h-3.5 w-3.5" />} {busy ? 'Testing… (about 15 seconds)' : 'Run connection test'}
+        </button>
+      ) : (
+        <div className="mt-2 grid grid-cols-2 gap-2">
+          <button onClick={() => setConfirming(false)} className="rounded-lg border border-line-2 px-3 py-2 text-[12px] text-muted">
+            Cancel
+          </button>
+          <button onClick={run} className="rounded-lg bg-info px-3 py-2 text-[12px] font-bold text-ink">
+            Yes, run $1 test
+          </button>
+        </div>
+      )}
+      {error && <div className="mt-2 break-words text-[11px] text-down">{error}</div>}
+      {result && (
+        <div className="mt-2 rounded-lg border border-line bg-panel-2 p-2.5">
+          <div className={`text-[12px] font-bold ${result.status === 'PASSED' ? 'text-up' : result.status === 'PARTIAL' ? 'text-warn' : 'text-down'}`}>
+            {result.status === 'PASSED' ? 'Everything works' : result.status === 'PARTIAL' ? 'Mostly works' : 'Test failed'}
+          </div>
+          <ul className="mt-1.5 space-y-1.5">
+            {result.steps.map((s) => (
+              <li key={s.step} className="flex gap-1.5 text-[11px]">
+                {s.ok ? <CheckCircle2 className="mt-px h-3.5 w-3.5 shrink-0 text-up" /> : <XCircle className="mt-px h-3.5 w-3.5 shrink-0 text-down" />}
+                <span className="min-w-0">
+                  <span className="font-medium text-fg">{s.step}</span>
+                  <span className="block break-words text-faint">{s.detail}</span>
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
     </div>
   );
 }
