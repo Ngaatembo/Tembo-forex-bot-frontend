@@ -9,6 +9,7 @@ import {
   Gauge,
   ShieldCheck,
   MoreHorizontal,
+  Trophy,
   X,
 } from 'lucide-react';
 import { API_BASE_URL, onWakeChange, useApi } from './lib/api';
@@ -24,6 +25,7 @@ import Research from './pages/Research';
 import News from './pages/News';
 import Dashboard from './pages/Dashboard';
 import TestLab from './pages/TestLab';
+import Results from './pages/Results';
 
 class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { error: Error | null }> {
   state: { error: Error | null } = { error: null };
@@ -49,7 +51,7 @@ class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { err
   }
 }
 
-type RouteKey = 'live' | 'markets' | 'decisions' | 'paper' | 'news' | 'research' | 'overview' | 'test-lab';
+type RouteKey = 'live' | 'results' | 'markets' | 'decisions' | 'paper' | 'news' | 'research' | 'overview' | 'test-lab';
 
 interface RouteDef {
   key: RouteKey;
@@ -62,6 +64,7 @@ interface RouteDef {
 
 const ROUTES: RouteDef[] = [
   { key: 'live', label: 'Dashboard', tab: 'Dashboard', icon: LayoutDashboard, page: Dashboard, wide: true },
+  { key: 'results', label: 'Results', tab: 'Results', icon: Trophy, page: Results },
   { key: 'markets', label: 'Live Markets', tab: 'Markets', icon: CandlestickChart, page: Markets },
   { key: 'decisions', label: 'Trade Signals', tab: 'Signals', icon: Signal, page: Decisions },
   { key: 'paper', label: 'Paper Trading', tab: 'Paper', icon: Wallet, page: Paper },
@@ -70,8 +73,8 @@ const ROUTES: RouteDef[] = [
   { key: 'overview', label: 'System Overview', tab: 'System', icon: Gauge, page: Overview },
   { key: 'test-lab', label: 'Test Lab', tab: 'Test lab', icon: ShieldCheck, page: TestLab },
 ];
-const TOP_TABS: RouteKey[] = ['live', 'markets', 'decisions', 'paper', 'news', 'research'];
-const BOTTOM_TABS: RouteKey[] = ['live', 'markets', 'decisions', 'paper'];
+const TOP_TABS: RouteKey[] = ['live', 'results', 'markets', 'decisions', 'paper', 'news', 'research'];
+const BOTTOM_TABS: RouteKey[] = ['live', 'results', 'markets', 'decisions'];
 
 function parseHash(): RouteKey {
   const r = window.location.hash.replace(/^#\/?/, '').split('/')[0];

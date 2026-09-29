@@ -2,10 +2,17 @@
   // Cloudflare Worker that serves the built site from ./dist.
   // "name" must match the Worker in your Cloudflare dashboard (tembobot).
   "name": "tembobot",
+  "main": "worker/index.js",
   "compatibility_date": "2026-09-01",
   "assets": {
     "directory": "./dist",
+    "binding": "ASSETS",
     "not_found_handling": "single-page-application"
+  },
+  // Every 10 minutes: ping the backend so Render's free plan does not put it
+  // to sleep (alerts and the results scoreboard only run while it is awake).
+  "triggers": {
+    "crons": ["*/10 * * * *"]
   },
   "preview_urls": true,
   "previews": {}
