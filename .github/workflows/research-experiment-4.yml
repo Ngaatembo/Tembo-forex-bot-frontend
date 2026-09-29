@@ -1,0 +1,66 @@
+name: Research - Experiment 4 on fresh Deriv data
+
+# Lives in the website repo only because this is where workflows can be added
+# from the current session. It checks out the public backend repo, downloads
+# Deriv candles from 2023 to today, re-tests Experiment 4's Stage 1 choices
+# and publishes the JSON to this repo's `research-results` branch.
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/research-experiment-4.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: research-experiment-4
+  cancel-in-progress: false
+
+jobs:
+  fresh-data:
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    env:
+      PYTHONPATH: ${{ github.workspace }}/backend-repo/backend
+      MARKET_DATA_PROVIDER: deriv
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: Ngaatembo/Tembo-forex-bot
+          path: backend-repo
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install backend
+        working-directory: backend-repo/backend
+        run: pip install -r requirements.txt
+      - name: Download Deriv candles (2023 to today)
+        working-directory: backend-repo/backend
+        run: python -m scripts.fetch_deriv_history --out-dir data/deriv --start 2023-01-01
+      - name: Re-test Stage 1 choices on fresh data (+ m5 scan)
+        working-directory: backend-repo/backend
+        run: >
+          python -m scripts.run_edge_validation_experiment_4_fresh
+          --data-dir data/deriv
+          --stage1 ../research/results/edge_validation_experiment_4.json
+          --output ${{ runner.temp }}/edge_validation_experiment_4_fresh.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: edge-validation-experiment-4-fresh
+          path: ${{ runner.temp }}/edge_validation_experiment_4_fresh.json
+          retention-days: 30
+      - name: Publish results to the research-results branch
+        working-directory: ${{ runner.temp }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir publish && cd publish
+          git init -q
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          cp ../edge_validation_experiment_4_fresh.json .
+          git add .
+          git commit -q -m "Experiment 4 fresh-data results"
+          git push -f "https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.git" HEAD:research-results
