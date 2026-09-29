@@ -233,7 +233,9 @@ function DemoExecution({
     setBusy('buy');
     setMsg(null);
     try {
-      const r = await apiPost<DerivBuy>('/deriv/demo/buy', { proposal_id: proposal.proposal_id, price: proposal.ask_price, execution_token: proposal.execution_token });
+      // The backend re-checks Tembo, then quotes and buys on one Deriv connection
+      // (a Deriv quote id only works on the connection that created it).
+      const r = await apiPost<DerivBuy>('/deriv/demo/buy', { execution_token: proposal.execution_token, timeframe: timeframe.toLowerCase() });
       setContractId(r.contract_id);
       storeContract(r.contract_id);
       setProposal(null);
