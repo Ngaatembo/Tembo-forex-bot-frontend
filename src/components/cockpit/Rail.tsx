@@ -182,7 +182,7 @@ function DemoExecution({
   const signal = signalOf(decision);
   const eligible = decision?.paper_eligibility?.eligible === true;
   const [stake, setStake] = useState('10');
-  const [multiplier, setMultiplier] = useState('50');
+  const [multiplier, setMultiplier] = useState('100');
   const [busy, setBusy] = useState<null | 'proposal' | 'buy' | 'sell'>(null);
   const [proposal, setProposal] = useState<(DerivProposal & { at: number }) | null>(null);
   const [msg, setMsg] = useState<{ tone: 'good' | 'bad'; text: string } | null>(null);
@@ -268,7 +268,7 @@ function DemoExecution({
             <input value={stake} onChange={(e) => setStake(e.target.value.replace(/[^\d.]/g, ''))} inputMode="decimal" className="num mt-0.5 w-full rounded-md border border-line bg-panel-2 px-2 py-1 text-[12px] text-fg outline-none focus:border-brand/50" />
           </label>
           <label className="text-[10px] text-faint">
-            Multiplier
+            Multiplier <span className="text-faint">(auto-adjusts)</span>
             <input value={multiplier} onChange={(e) => setMultiplier(e.target.value.replace(/[^\d]/g, ''))} inputMode="numeric" className="num mt-0.5 w-full rounded-md border border-line bg-panel-2 px-2 py-1 text-[12px] text-fg outline-none focus:border-brand/50" />
           </label>
         </div>
