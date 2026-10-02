@@ -41,6 +41,7 @@ export function nextReview(lastCandleIso: string | null | undefined, tf: string)
   const t = new Date(lastCandleIso).getTime();
   if (Number.isNaN(t)) return null;
   // lastCandle is the start of the last completed candle; the next review is one timeframe later.
+  return new Date(t + step * 1000).toISOString();
 }
 
 function confidenceBand(v: number | null): { label: string; tone: Tone } {
