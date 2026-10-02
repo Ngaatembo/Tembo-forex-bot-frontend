@@ -279,7 +279,7 @@ export function TradePlanCard({
       const s = a.support_resistance?.support;
       if (finite(r) || finite(s)) steps.push(`Levels to watch: resistance ${fmtPrice(r ?? null, digits)}, support ${fmtPrice(s ?? null, digits)}.`);
     }
-    steps.push(`Macro risk is ${human(decision.macro_risk?.level, 'unknown').toLowerCase()}. Tembo blocks new trades when it is medium, high or unknown.`);
+    steps.push(`Macro risk is ${human(decision.macro_risk?.level, 'unknown').toLowerCase()}. Tembo blocks new trades when macro risk is high; medium risk is surfaced as context and the other gates still decide eligibility.`);
     steps.push(review ? `Next review after the ${tf} candle closes at ${timeLocal(review)}. Tembo re-checks automatically.` : 'Tembo re-checks automatically on the next completed candle.');
   }
 
